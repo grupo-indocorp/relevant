@@ -3,7 +3,7 @@ import laravel, { refreshPaths } from 'laravel-vite-plugin';
 
 export default defineConfig({
     server: {
-        host: 'win.test',
+        host: 'relevant.test',
     },
     plugins: [
         laravel({

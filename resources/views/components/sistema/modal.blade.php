@@ -9,10 +9,10 @@
 
         {{-- HEADER --}}
         <div class="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-gray-100 to-gray-100 shadow-sm">
-            <h5 class="text-xl font-semibold text-orange-600 uppercase tracking-wide">
+            <h5 class="text-xl font-semibold text-pink-600 uppercase tracking-wide">
                 {{ $title }}
             </h5>
-            <button class="text-orange-500 hover:text-orange-600 transition-all duration-200 text-2xl"
+            <button class="text-pink-500 hover:text-pink-600 transition-all duration-200 text-2xl"
                 onclick="{{ $onclickCloseModal }}" title="Cerrar">
                 <i class="fa-solid fa-xmark"></i>
             </button>

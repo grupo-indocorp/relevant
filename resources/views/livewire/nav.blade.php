@@ -3,8 +3,8 @@
         <nav class="flex justify-between items-center">
             <!-- Mensaje de bienvenida y frase motivadora -->
             <div>
-                <h4 class="font-bold text-1xl text-[#EB5C1F] mb-2">{{ $saludo }}</h4>
-                <h4 class="text-xl text-[#ec936c] " id="frase-motivadora">{{ $fraseAleatoria }}</h4>
+                <h4 class="font-bold text-1xl text-[#5a009a] mb-2">{{ $saludo }}</h4>
+                <h4 class="text-xl text-[#5a009ada] " id="frase-motivadora">{{ $fraseAleatoria }}</h4>
             </div>
 
             <!-- Botones de notificaciones y perfil -->
@@ -12,15 +12,15 @@
                 <!-- Botón de notificaciones -->
                 @can('sistema.notificacion')
                 <a href="{{ url('notificacion') }}" 
-                    class="cursor-pointer p-2 rounded-full transition-all duration-200 hover:bg-[#EB5C1F]/25"
+                    class="cursor-pointer p-2 rounded-full transition-all duration-200 hover:bg-[#5a009a]/25"
                     data-bs-toggle="tooltip" 
                     data-bs-placement="right"
                     data-bs-original-title="Agenda">
-                    <i class="fa-solid fa-regular fa-calendar-days text-2xl text-[#EB5C1F] group-hover:scale-110 transition-transform duration-200"></i>
+                    <i class="fa-solid fa-regular fa-calendar-days text-2xl text-[#5a009a] group-hover:scale-110 transition-transform duration-200"></i>
                 </a>
                 @endcan
                 <x-ui.button type="button"
-                    class="text-xs bg-[#EB5C1F] text-white px-3 py-2 rounded-lg hover:bg-[#ec936c] transition duration-300"
+                    class="text-xs bg-[#5a009a] text-white px-3 py-2 rounded-lg hover:bg-[#5a009ada] transition duration-300"
                     onclick="cargarNotificacion('pendiente')">
                     {{ count(Helpers::NotificacionRecordatorio($user)) }} <i class="fa-solid fa-bell"></i>
                 </x-ui.button>
@@ -29,7 +29,7 @@
                 <div class="relative ml-3" x-data="{ open: false }">
                     <div class="w-[2.4rem]">
                         <button x-on:click="open = true" type="button"
-                            class="flex max-w-xs items-center rounded-full bg-[#EB5C1F] text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#EB5C1F]"
+                            class="flex max-w-xs items-center rounded-full bg-[#5a009a] text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#5a009a]"
                             id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                             <img class="h-100 w-100 rounded-full" src="{{ $user->profile_photo_url }}"
                                 alt="">
@@ -37,18 +37,18 @@
                     </div>
 
                     <div x-show="open" x-on:click.away="open=false"
-                        class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-[#ec936c] ring-opacity-5 focus:outline-none"
+                        class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-[#5a009ada] ring-opacity-5 focus:outline-none"
                         role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                         <a href="{{ route('profile.show') }}"
-                            class="block text-[#EB5C1F] hover:text-[#ec936c] rounded-md px-3 py-2 text-sm font-medium"
+                            class="block text-[#5a009a] hover:text-[#5a009ada] rounded-md px-3 py-2 text-sm font-medium"
                             role="menuitem" tabindex="-1" id="user-menu-item-0">Perfil</a>
                         <a href="{{ url('cliente-gestion') }}"
-                            class="block text-[#EB5C1F] hover:text-[#ec936c] rounded-md px-3 py-2 text-sm font-medium"
+                            class="block text-[#5a009a] hover:text-[#5a009ada] rounded-md px-3 py-2 text-sm font-medium"
                             role="menuitem" tabindex="-1" id="user-menu-item-1">Gestión de Clientes</a>
                         <form method="POST" action="{{ route('logout') }}" x-data>
                             @csrf
                             <a href="{{ route('logout') }}"
-                                class="block text-[#EB5C1F] hover:text-[#ec936c] rounded-md px-3 py-2 text-sm font-medium"
+                                class="block text-[#5a009a] hover:text-[#5a009ada] rounded-md px-3 py-2 text-sm font-medium"
                                 role="menuitem" tabindex="-1" id="user-menu-item-2"
                                 @click.prevent="$root.submit();">Salir</a>
                         </form>

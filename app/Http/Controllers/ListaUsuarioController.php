@@ -93,7 +93,7 @@ class ListaUsuarioController extends Controller
             $first_surname = strtolower(request('first_surname'));
             $second_surname = strtolower(request('second_surname')) ?? '';
             $name = $first_name.' '.$second_name.' '.$first_surname.' '.$second_surname;
-            $email = str_replace(' ', '', $first_name).'.'.str_replace(' ', '', $first_surname).'@wincom.pe';
+            $email = str_replace(' ', '', $first_name).'.'.str_replace(' ', '', $first_surname).'@relevantperu.com';
 
             if (User::where('email', $email)->exists()) {
                 return response()->json(['error' => 'El usuario ya existe con el correo electrónico ' . $email], 422);

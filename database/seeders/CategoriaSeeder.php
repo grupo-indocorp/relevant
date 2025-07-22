@@ -13,7 +13,7 @@ class CategoriaSeeder extends Seeder
     public function run(): void
     {
         Categoria::factory()->create([
-            'nombre' => 'Antiguos',
+            'nombre' => 'Principal',
             'estado' => false,
         ]);
     }

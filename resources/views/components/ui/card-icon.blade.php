@@ -1,5 +1,5 @@
 <section {{ $attributes->merge(['class' => 'w-full bg-slate-50 rounded-2xl flex-auto p-4 text-center hover:bg-slate-100']) }}>
-    <h3 class="text-7xl text-transparent bg-gradient-to-r from-blue-400 to-#EB5C1F bg-clip-text">
+    <h3 class="text-7xl text-transparent bg-gradient-to-r from-blue-400 to-#5a009a bg-clip-text">
         @if (isset($icon))
             {{ $icon }}
         @else

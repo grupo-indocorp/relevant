@@ -117,14 +117,14 @@
                                     ])
                                     <div class="flex gap-4">
                                         <div class="flex flex-col items-center">
-                                            <span class="text-orange-600 text-base font-bold">Nuevos</span>
+                                            <span class="text-pink-600 text-base font-bold">Nuevos</span>
                                             <x-ui.count-rectangle>
                                                 <x-slot:toggle>Clientes Nuevos</x-slot>
                                                 {{ $countClienteNuevo }}
                                             </x-ui.count-rectangle>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <span class="text-orange-600 text-base font-bold">Gestionados</span>
+                                            <span class="text-pink-600 text-base font-bold">Gestionados</span>
                                             <x-ui.count-rectangle>
                                                 <x-slot:toggle>Clientes Gestionados</x-slot>
                                                 {{ $countClienteGestionado }}

@@ -27,7 +27,7 @@
                                     @if ($value->comentario_gestion_estado)
                                         <span class="bg-green-200 text-xs font-semibold font-se mb-0 px-3 py-1 rounded-lg">Confirmado</span>
                                     @else
-                                        <span class="bg-orange-200 text-xs font-semibold font-se mb-0 px-3 py-1 rounded-lg">Pendiente</span>
+                                        <span class="bg-pink-200 text-xs font-semibold font-se mb-0 px-3 py-1 rounded-lg">Pendiente</span>
                                     @endif
                                 </td>
                                 <td>

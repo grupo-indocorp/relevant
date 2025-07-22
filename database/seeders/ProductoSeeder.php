@@ -13,16 +13,24 @@ class ProductoSeeder extends Seeder
     public function run(): void
     {
         Producto::factory()->create([
-            'nombre' => 'Móvil Alta Nueva',
+            'nombre' => 'SOHO',
+            'categoria_id' => 1,
         ]);
         Producto::factory()->create([
-            'nombre' => 'Móvil Portabilidad',
+            'nombre' => 'Internet Empresas',
+            'categoria_id' => 1,
         ]);
         Producto::factory()->create([
-            'nombre' => 'Fija',
+            'nombre' => 'BUNDLE',
+            'categoria_id' => 1,
         ]);
         Producto::factory()->create([
-            'nombre' => 'Avanzada',
+            'nombre' => 'GPON',
+            'categoria_id' => 1,
+        ]);
+        Producto::factory()->create([
+            'nombre' => 'Internet Dedicado',
+            'categoria_id' => 1,
         ]);
     }
 }

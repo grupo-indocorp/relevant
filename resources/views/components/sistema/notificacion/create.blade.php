@@ -53,14 +53,14 @@
                     </div>
                     {{-- Cabecera: Asunto a la izquierda / Usuario + Fecha-Hora a la derecha --}}
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="fw-semibold text-orange-600 fs-6">{{ $item->asunto }}</div>
-                        <div class="d-flex gap-3 text-sm text-orange-600">
+                        <div class="fw-semibold text-pink-600 fs-6">{{ $item->asunto }}</div>
+                        <div class="d-flex gap-3 text-sm text-pink-600">
                             <div class="d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-user text-orange-500"></i>
+                                <i class="fa-solid fa-user text-pink-500"></i>
                                 <span>{{ $item->user->name }}</span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-calendar-days text-orange-500"></i>
+                                <i class="fa-solid fa-calendar-days text-pink-500"></i>
                                 <span>
                                     {{ \Carbon\Carbon::parse($item->fecha)->format('d-m-Y') }}
                                     {{ \Carbon\Carbon::parse($item->hora)->format('h:i A') }}
@@ -137,14 +137,14 @@
                         ${notificacion.mensaje}
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="fw-semibold text-orange-600 fs-6">${notificacion.asunto}</div>
-                        <div class="d-flex gap-3 text-sm text-orange-600">
+                        <div class="fw-semibold text-pink-600 fs-6">${notificacion.asunto}</div>
+                        <div class="d-flex gap-3 text-sm text-pink-600">
                             <div class="d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-user text-orange-500"></i>
+                                <i class="fa-solid fa-user text-pink-500"></i>
                                 <span>${notificacion.username}</span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-calendar-days text-orange-500"></i>
+                                <i class="fa-solid fa-calendar-days text-pink-500"></i>
                                 <span>
                                     ${notificacion.fecha}
                                     ${notificacion.hora}

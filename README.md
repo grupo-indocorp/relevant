@@ -20,8 +20,8 @@ Pero si no quiere seguir ninguna de nuestras opciones, asegúrate de tener insta
 **Clonar el Repositorio:**
 
 ```bash
-git clone git@github.com:grupo-indocorp/win.git
-cd win
+git clone git@github.com:grupo-indocorp/relevant.git
+cd relevant
 ```
 
 *Si el proyecto se levanta usando XAMP:*
@@ -105,7 +105,7 @@ Puedes usar la ruta de [indotech.test](indotech.test) y para que carguen los ass
 ```js
 export default defineConfig({
   server: {
-    host: 'win.test',
+    host: 'relevant.test',
   },
   ...
 });

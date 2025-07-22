@@ -13,39 +13,40 @@ class EtapaSeeder extends Seeder
     public function run(): void
     {
         Etapa::factory()->create([
-            'nombre' => 'Sin Gestión',
+            'nombre' => 'Oportunidades',
             'color' => '#f97516',
             'opacity' => '#f975164d',
+            'orden' => 10,
         ]);
-
         Etapa::factory()->create([
-            'nombre' => 'Interesado 25%',
+            'nombre' => 'Prospectos',
             'color' => '#f97516',
             'opacity' => '#f975164d',
+            'orden' => 20,
         ]);
-
         Etapa::factory()->create([
-            'nombre' => 'Prospecto 50%',
-            'color' => '#f59e0b',
-            'opacity' => '#f59e0b4d',
+            'nombre' => 'Pre Clientes',
+            'color' => '#f97516',
+            'opacity' => '#f975164d',
+            'orden' => 30,
         ]);
-
         Etapa::factory()->create([
-            'nombre' => 'Oportunidad 75%',
-            'color' => '#facc15',
-            'opacity' => '#facc154d',
+            'nombre' => 'Ventas',
+            'color' => '#f97516',
+            'opacity' => '#f975164d',
+            'orden' => 40,
         ]);
-
         Etapa::factory()->create([
-            'nombre' => 'Ganado 100%',
-            'color' => '#84cc16',
-            'opacity' => '#84cc164d',
+            'nombre' => 'No Vendidos',
+            'color' => '#f97516',
+            'opacity' => '#f975164d',
+            'orden' => 50,
         ]);
-
         Etapa::factory()->create([
-            'nombre' => 'Perdido',
-            'color' => '#dc2626',
-            'opacity' => '#dc26264d',
+            'nombre' => 'Clientes Reportados',
+            'color' => '#f97516',
+            'opacity' => '#f975164d',
+            'orden' => 60,
         ]);
     }
 }

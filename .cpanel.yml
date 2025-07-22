@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/xdsdw07tvnp4/wincom.pe/
+    - export DEPLOYPATH=/home/xdsdw07tvnp4/relevantperu.com/
     - /usr/bin/rsync -av --exclude='index.php' public/ $DEPLOYPATH/
     - cp deploy/index.cpanel.php $DEPLOYPATH/index.php

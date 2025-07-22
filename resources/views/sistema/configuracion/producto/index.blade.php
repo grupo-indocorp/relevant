@@ -20,7 +20,7 @@
                     <div class="timeline timeline-one-side">
                         @foreach ($productos as $item)
                             <div class="timeline-block">
-                                <span class="timeline-step text-orange-400">
+                                <span class="timeline-step text-pink-400">
                                     <i class="fa-solid fa-box-open-full"></i>
                                 </span>
                                 <div class="timeline-content mb-2">

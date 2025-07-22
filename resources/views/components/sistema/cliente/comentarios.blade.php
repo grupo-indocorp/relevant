@@ -35,8 +35,8 @@
             @foreach ($comentarios as $comentario)
                 <div class="border rounded px-3 py-2 mb-2 bg-white shadow-sm">
                     <!-- Texto del comentario con ícono -->
-                    <div class="mb-1 text-m text-orange-600 fw-semibold d-flex align-items-start">
-                        <i class="fa-solid fa-comment text-orange-400 me-2 mt-1"></i>
+                    <div class="mb-1 text-m text-pink-600 fw-semibold d-flex align-items-start">
+                        <i class="fa-solid fa-comment text-pink-400 me-2 mt-1"></i>
                         <span>{{ $comentario['comentario'] }}</span>
                     </div>
 

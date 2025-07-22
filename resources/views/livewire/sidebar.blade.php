@@ -1,6 +1,6 @@
 <aside class="h-screen"> <!-- Ancho reducido -->
     <!-- Fondo ultra minimalista con sutil acento naranja -->
-    <div class="bg-white/25 backdrop-blur-md min-h-full p-1 border-r border-[#EB5C1F]/10">
+    <div class="bg-white/25 backdrop-blur-md min-h-full p-1 border-r border-[#5a009a]/10">
         <ul class="p-0 m-0 flex flex-col items-center space-y-6"> <!-- Centrado vertical -->
             @if (is_array($links) || is_object($links))
                 @foreach ($links as $link)
@@ -8,13 +8,13 @@
                         <li class="group w-full flex justify-center">
                             <a 
                                 href="{{ url($link['url']) }}" 
-                                class="cursor-pointer p-2 rounded-full transition-all duration-200 hover:bg-[#EB5C1F]/25"
+                                class="cursor-pointer p-2 rounded-full transition-all duration-200 hover:bg-[#5a009a]/25"
                                 data-bs-toggle="tooltip" 
                                 data-bs-placement="right"
                                 data-bs-original-title="{{ $link['nombre'] }}"
                             >
                                 <!-- Icono naranja puro con hover sutil -->
-                                <i class="fa-solid {{ $link['icon'] }} text-2xl text-[#EB5C1F] group-hover:scale-110 transition-transform duration-200"></i>
+                                <i class="fa-solid {{ $link['icon'] }} text-2xl text-[#5a009a] group-hover:scale-110 transition-transform duration-200"></i>
                             </a>
                         </li>
                     @endcan
