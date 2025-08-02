@@ -297,18 +297,6 @@ class ClienteGestionController extends Controller
         if ($view == 'show-validar-ruc') {
             $request->validate(
                 [
-                    'ruc' => 'numeric|digits:11|starts_with:20|unique:clientes,ruc|bail',
-                ],
-                [
-                    'ruc.numeric' => 'El "Ruc" debe ser numérico.',
-                    'ruc.digits' => 'El "Ruc" debe tener exactamente 11 dígitos.',
-                    'ruc.starts_with' => 'El "Ruc" debe iniciar con 20.',
-                    'ruc.unique' => 'El "Ruc" ya se encuentra registrado.',
-                ]
-            );
-        } elseif ($view == 'show-validar-ruc-secodi') {
-            $request->validate(
-                [
                     'ruc' => 'numeric|digits:11|starts_with:20,10|unique:clientes,ruc|bail',
                 ],
                 [
