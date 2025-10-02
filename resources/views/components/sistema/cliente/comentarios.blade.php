@@ -15,6 +15,14 @@
 
     <!-- Área para nuevo comentario -->
     @role('ejecutivo')
+        <div class="form-check form-switch">
+            <label class="form-check-label" for="contactabilidad">{{ __('Contacto Exitoso') }}</label>
+            <input class="form-check-input" 
+                type="checkbox" 
+                id="contactabilidad"
+                name="contactabilidad"
+                @if($cliente->contactabilidad ?? true) checked @endif>
+        </div>
         <div class="mb-3">
             <textarea class="form-control form-control-sm"
                 id="comentario"
@@ -57,3 +65,14 @@
 
     </div>
 </x-sistema.card>
+<script>
+    $(document).ready(function() {
+        $('#contactabilidad').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#comentario').val('');
+            } else {
+                $('#comentario').val('No Contactado');
+            }
+        });
+    });
+</script>

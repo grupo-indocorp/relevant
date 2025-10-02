@@ -130,6 +130,7 @@
                 sucursal_provincia_codigo: $('#sucursal_provincia_codigo').val(),
                 sucursal_distrito_codigo: $('#sucursal_distrito_codigo').val(),
                 // comentario
+                contactabilidad: $('#contactabilidad').is(':checked'),
                 comentario: $('#comentario').val(),
                 // movistar
                 estadowick_id: $('#estadowick_id').val() ?? null,
