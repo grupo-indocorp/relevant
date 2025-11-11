@@ -21,18 +21,29 @@ class ClienteRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'ruc' => 'required|numeric|digits:11|starts_with:20,10|unique:clientes,ruc|bail',
             'razon_social' => 'required|bail',
-            'ciudad' => 'required|bail',
-            'departamento_codigo' => 'required',
-            'provincia_codigo' => 'required',
-            'distrito_codigo' => 'required',
             'comentario' => 'required|bail',
             'etapa_id' => 'required|bail',
-            'linea_entel' => 'required|bail',
-            'linea_bitel' => 'required|bail',
         ];
+
+        // Verifica si hay RUC ingresado
+        $ruc = $this->input('ruc');
+
+        if ($ruc && str_starts_with($ruc, '20')) {
+            $rules['ciudad'] = 'required|bail';
+            $rules['departamento_codigo'] = 'required|bail';
+            $rules['provincia_codigo'] = 'required|bail';
+            $rules['distrito_codigo'] = 'required|bail';
+        } else {
+            $rules['ciudad'] = 'nullable';
+            $rules['departamento_codigo'] = 'nullable';
+            $rules['provincia_codigo'] = 'nullable';
+            $rules['distrito_codigo'] = 'nullable';
+        }
+
+        return $rules;
     }
 
     /**
@@ -55,8 +66,6 @@ class ClienteRequest extends FormRequest
             'distrito_codigo.required' => 'El "Distrito" es obligatorio.',
             'comentario.required' => 'El "Comentario" es obligatorio.',
             'etapa_id.required' => 'La "Etapa" es obligatorio.',
-            'linea_entel.required' => 'La "Cantidad de trabajadores" es obligatorio.',
-            'linea_bitel.required' => 'La "Cantidad de sucursales" es obligatorio.',
         ];
     }
 }

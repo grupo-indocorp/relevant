@@ -19,7 +19,6 @@
     </div>
 
     <div class="row g-3" id="form-datos-cliente">
-        {{-- RUC y Razón Social --}}
         <div class="col-md-4">
             <input type="text"
                 id="ruc"
@@ -40,7 +39,33 @@
                 value="{{ $cliente->razon_social ?? '' }}"
                 disabled>
         </div>
-        {{-- Dirección Fiscal --}}
+        <div class="col-4">
+            <input type="text"
+                id="estado"
+                name="estado"
+                class="form-control"
+                placeholder="Estado *"
+                value="{{ $cliente->estado ?? '' }}"
+                disabled>
+        </div>
+        <div class="col-4">
+            <input type="text"
+                id="condicion"
+                name="condicion"
+                class="form-control"
+                placeholder="Condición *"
+                value="{{ $cliente->condicion ?? '' }}"
+                disabled>
+        </div>
+        <div class="col-4">
+            <input type="text"
+                id="actividad_economica"
+                name="actividad_economica"
+                class="form-control"
+                placeholder="Actividad Económica *"
+                value="{{ $cliente->actividad_economica ?? '' }}"
+                disabled>
+        </div>
         <div class="col-12">
             <input type="text"
                 id="ciudad"
@@ -50,8 +75,6 @@
                 value="{{ $cliente->ciudad ?? '' }}"
                 disabled>
         </div>
-
-        {{-- Departamento, Provincia y Distrito --}}
         <div x-data="ubigeoSelects(
                 '{{ $cliente->departamento_codigo ?? '' }}',
                 '{{ $cliente->provincia_codigo ?? '' }}',
@@ -113,6 +136,9 @@
         return {
             ruc: $('#ruc').val(),
             razon_social: $('#razon_social').val(),
+            estado: $('#estado').val(),
+            condicion: $('#condicion').val(),
+            actividad_economica: $('#actividad_economica').val(),
             ciudad: $('#ciudad').val(),
             departamento_codigo: $('#departamento_codigo').val(),
             provincia_codigo: $('#provincia_codigo').val(),
@@ -155,7 +181,7 @@
         const cliente_id = $('#cliente_id').val();
 
         // Validación simple
-        if (!data.ruc || !data.razon_social || !data.ciudad || !data.departamento_codigo || !data.provincia_codigo || !data.distrito_codigo) {
+        if (!data.ruc || !data.razon_social) {
             alert('Por favor, complete todos los campos obligatorios.');
             return;
         }
@@ -170,7 +196,7 @@
             url: `/cliente-gestion/${cliente_id}`,
             method: 'PUT',
             data: {
-                view: 'update-datos-cliente',
+                view: 'update-cliente',
                 ...data
             },
             success: function () {
@@ -186,26 +212,19 @@
     }
 
     function validarRuc(element) {
-        const ruc = element.value;
-        if (ruc.length !== 11) {
-            alert('El RUC debe tener exactamente 11 dígitos.');
-            return;
+        const ruc = element.value.trim();
+        mostrarOcultarCamposPorRuc(ruc);
+        if (ruc.length === 11) {
+            $.ajax({
+                url: '{{ url("cliente-gestion/0") }}',
+                method: "GET",
+                data: { view: 'show-validar-ruc', ruc: ruc },
+                success: function(result) {},
+                error: function() {
+                    alert('Error al validar RUC.');
+                }
+            });
         }
-
-        $.ajax({
-            url: '{{ url("cliente-gestion/0") }}',
-            method: "GET",
-            data: {
-                view: 'show-validar-ruc',
-                ruc: ruc
-            },
-            success: function (result) {
-                // puedes mostrar info de validez si deseas
-            },
-            error: function (response) {
-                alert('Error al validar RUC.');
-            }
-        });
     }
 
     function ubigeoSelects(departamentoInicial = '', provinciaInicial = '', distritoInicial = '', isReadOnly = false) {
@@ -254,4 +273,62 @@
             }
         };
     }
+
+    $(document).ready(function() {
+        function mostrarOcultarCamposPorRuc(ruc) {
+            if (!ruc || ruc.length !== 11) {
+                // Si no hay RUC o es inválido, oculta todo
+                $("#ciudad").closest('div').hide();
+                $("#departamento_codigo").closest('div').hide();
+                $("#provincia_codigo").closest('div').hide();
+                $("#distrito_codigo").closest('div').hide();
+                return;
+            }
+
+            const prefix = ruc.substring(0, 2);
+
+            if (prefix === "10") {
+                // Persona natural → ocultar
+                $("#ciudad").closest('div').hide();
+                $("#departamento_codigo").closest('div').hide();
+                $("#provincia_codigo").closest('div').hide();
+                $("#distrito_codigo").closest('div').hide();
+            } else if (prefix === "20") {
+                // Empresa → mostrar
+                $("#ciudad").closest('div').show();
+                $("#departamento_codigo").closest('div').show();
+                $("#provincia_codigo").closest('div').show();
+                $("#distrito_codigo").closest('div').show();
+            } else {
+                // Prefijo desconocido → ocultar todo por seguridad
+                $("#ciudad").closest('div').hide();
+                $("#departamento_codigo").closest('div').hide();
+                $("#provincia_codigo").closest('div').hide();
+                $("#distrito_codigo").closest('div').hide();
+            }
+        }
+
+        // Al cargar la página o abrir el modal
+        const rucValue = $("#ruc").val();
+        mostrarOcultarCamposPorRuc(rucValue);
+
+        // También cuando cambia manualmente (ya lo tienes en onchange)
+        window.validarRuc = function(element) {
+            const ruc = element.value.trim();
+            mostrarOcultarCamposPorRuc(ruc);
+
+            // Si quieres mantener tu llamada AJAX:
+            if (ruc.length === 11) {
+                $.ajax({
+                    url: '{{ url("cliente-gestion/0") }}',
+                    method: "GET",
+                    data: { view: 'show-validar-ruc', ruc: ruc },
+                    success: function(result) {},
+                    error: function() {
+                        alert('Error al validar RUC.');
+                    }
+                });
+            }
+        };
+    });
 </script>

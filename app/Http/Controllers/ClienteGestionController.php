@@ -407,31 +407,41 @@ class ClienteGestionController extends Controller
         $view = request('view');
         $cliente = Cliente::find($id);
         if ($view === 'update-cliente') {
-            $request->validate(
-                [
-                    'ruc' => 'required|numeric|digits:11|starts_with:20,10|unique:clientes,ruc,' . $id . '|bail',
-                    'razon_social' => 'required|bail',
-                    'ciudad' => 'required|bail',
-                    'departamento_codigo' => 'required',
-                    'provincia_codigo' => 'required',
-                    'distrito_codigo' => 'required',
-                ],
-                [
-                    'ruc.required' => 'El "Ruc" es obligatorio.',
-                    'ruc.numeric' => 'El "Ruc" debe ser numérico.',
-                    'ruc.digits' => 'El "Ruc" debe tener exactamente 11 dígitos.',
-                    'ruc.starts_with' => 'El "Ruc" debe iniciar con 20 o 10.',
-                    'ruc.unique' => 'El "Ruc" ya se encuentra registrado.',
-                    'razon_social.required' => 'La "Razón Social" es obligatorio.',
-                    'ciudad.required' => 'La "Ciudad" es obligatorio.',
-                    'departamento_codigo.required' => 'El "Departamento" es obligatorio.',
-                    'provincia_codigo.required' => 'La "Provincia" es obligatoria.',
-                    'distrito_codigo.required' => 'El "Distrito" es obligatorio.',
-                ]
-            );
+            $ruc = $request->input('ruc');
+            $rules = [
+                'ruc' => 'required|numeric|digits:11|starts_with:20,10|unique:clientes,ruc,' . $id . '|bail',
+                'razon_social' => 'required|bail',
+            ];
+            // Condicional según prefijo del RUC
+            if ($ruc && str_starts_with($ruc, '20')) {
+                $rules['ciudad'] = 'required|bail';
+                $rules['departamento_codigo'] = 'required|bail';
+                $rules['provincia_codigo'] = 'required|bail';
+                $rules['distrito_codigo'] = 'required|bail';
+            } else {
+                $rules['ciudad'] = 'nullable';
+                $rules['departamento_codigo'] = 'nullable';
+                $rules['provincia_codigo'] = 'nullable';
+                $rules['distrito_codigo'] = 'nullable';
+            }
+            $messages = [
+                'ruc.required' => 'El "Ruc" es obligatorio.',
+                'ruc.numeric' => 'El "Ruc" debe ser numérico.',
+                'ruc.digits' => 'El "Ruc" debe tener exactamente 11 dígitos.',
+                'ruc.starts_with' => 'El "Ruc" debe iniciar con 20 o 10.',
+                'ruc.unique' => 'El "Ruc" ya se encuentra registrado.',
+                'razon_social.required' => 'La "Razón Social" es obligatorio.',
+                'ciudad.required' => 'La "Ciudad" es obligatoria.',
+                'departamento_codigo.required' => 'El "Departamento" es obligatorio.',
+                'provincia_codigo.required' => 'La "Provincia" es obligatoria.',
+                'distrito_codigo.required' => 'El "Distrito" es obligatorio.',
+            ];
             $cliente->ruc = request('ruc');
             $cliente->razon_social = request('razon_social');
-            $cliente->ciudad = request('ciudad');
+            $cliente->estado = request('estado');
+            $cliente->condicion = request('condicion');
+            $cliente->actividad_economica = request('actividad_economica');
+            $cliente->ciudad = request('ciudad') ?? '-';
             $cliente->departamento_codigo = request('departamento_codigo');
             $cliente->provincia_codigo = request('provincia_codigo');
             $cliente->distrito_codigo = request('distrito_codigo');

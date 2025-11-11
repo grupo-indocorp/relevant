@@ -305,7 +305,10 @@ class ClienteService
         $cliente = new Cliente;
         $cliente->ruc = request('ruc');
         $cliente->razon_social = request('razon_social');
-        $cliente->ciudad = request('ciudad');
+        $cliente->estado = request('estado');
+        $cliente->condicion = request('condicion');
+        $cliente->actividad_economica = request('actividad_economica');
+        $cliente->ciudad = request('ciudad') ?? '-';
         $cliente->fecha_gestion = now();
         $cliente->fecha_nuevo = now();
         $cliente->etiqueta_id = 1; // nuevo
