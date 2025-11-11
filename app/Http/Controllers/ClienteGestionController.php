@@ -577,30 +577,19 @@ class ClienteGestionController extends Controller
 
             return response()->json($comentarios);
         } elseif ($view === 'update-movistar') {
-            $request->validate(
-                [
-                    'linea_entel' => 'required|bail',
-                    'linea_bitel' => 'required|bail',
-                    'clientetipo_id' => 'required|bail',
-                    'agencia_id' => 'required|bail',
-                ],
-                [
-                    'linea_entel.required' => 'La "Cantidad de trabajadores" es obligatorio.',
-                    'linea_bitel.required' => 'La "Cantidad de sucursales" es obligatorio.',
-                    'clientetipo_id.required' => 'El "Tipo de Cliente" es obligatorio.',
-                    'agencia_id.required' => 'El "Estado cliente" es obligatorio.',
-                ]
-            );
             $movistar = new Movistar;
             $movistar->linea_claro = request('linea_claro');
             $movistar->linea_entel = request('linea_entel');
             $movistar->linea_bitel = request('linea_bitel');
             $movistar->linea_movistar = request('linea_movistar');
-            $movistar->estadowick_id = request('estadowick_id') ?? null;
-            $movistar->estadodito_id = request('estadodito_id') ?? 1;
-            $movistar->clientetipo_id = request('clientetipo_id') ?? 1;
-            $movistar->ejecutivo_salesforce = request('ejecutivo_salesforce') ?? '';
-            $movistar->agencia_id = request('agencia_id') ?? 1;
+            $movistar->score = request('score');
+            $movistar->cantidad_trabajador = request('cantidad_trabajador');
+            $movistar->cantidad_sucursal = request('cantidad_sucursal');
+            $movistar->estadowick_id = null;
+            $movistar->estadodito_id = 1;
+            $movistar->clientetipo_id = 1;
+            $movistar->ejecutivo_salesforce = '';
+            $movistar->agencia_id = 1;
             $movistar->cliente_id = $cliente->id;
             $movistar->save();
             $this->clienteService->exportclienteStore($cliente->id);

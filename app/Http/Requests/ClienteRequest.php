@@ -30,11 +30,8 @@ class ClienteRequest extends FormRequest
             'distrito_codigo' => 'required',
             'comentario' => 'required|bail',
             'etapa_id' => 'required|bail',
-            'estadodito_id' => 'required|bail',
             'linea_entel' => 'required|bail',
             'linea_bitel' => 'required|bail',
-            'clientetipo_id' => 'required|bail',
-            'agencia_id' => 'required|bail',
         ];
     }
 
@@ -58,11 +55,8 @@ class ClienteRequest extends FormRequest
             'distrito_codigo.required' => 'El "Distrito" es obligatorio.',
             'comentario.required' => 'El "Comentario" es obligatorio.',
             'etapa_id.required' => 'La "Etapa" es obligatorio.',
-            'estadodito_id.required' => 'El "Estado Dito" es obligatorio.',
             'linea_entel.required' => 'La "Cantidad de trabajadores" es obligatorio.',
             'linea_bitel.required' => 'La "Cantidad de sucursales" es obligatorio.',
-            'clientetipo_id.required' => 'El "Tipo de Cliente" es obligatorio.',
-            'agencia_id.required' => 'El "Estado cliente" es obligatorio.',
         ];
     }
 }

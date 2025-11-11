@@ -133,15 +133,13 @@
                 contactabilidad: $('#contactabilidad').is(':checked'),
                 comentario: $('#comentario').val(),
                 // movistar
-                estadowick_id: $('#estadowick_id').val() ?? null,
-                estadodito_id: $('#estadodito_id').val() ?? 1,
                 linea_claro: $('#linea_claro').val() ?? 0,
                 linea_entel: $('#linea_entel').val() ?? 0,
                 linea_bitel: $('#linea_bitel').val() ?? 0,
                 linea_movistar: $('#linea_movistar').val() ?? 0,
-                clientetipo_id: $('#clientetipo_id').val() ?? 1,
-                ejecutivo_salesforce: $('#ejecutivo_salesforce').val() ?? '',
-                agencia_id: $('#agencia_id').val() ?? 1,
+                score: $('#score').val() ?? 0,
+                cantidad_trabajador: $('#cantidad_trabajador').val() ?? 0,
+                cantidad_sucursal: $('#cantidad_sucursal').val() ?? 0,
                 // etapa
                 etapa_id: $('#etapa_id').val(),
                 // cargo
@@ -167,6 +165,6 @@
     // Funcion para limpiar el disabled de los inputs
     $(document).ready(function () {
         $('#form-datos-cliente :input').prop('disabled', false);
-        $('#form-datos-adicionales :input').not('#linea_claro').prop('disabled', false);
+        $('#form-datos-adicionales :input').prop('disabled', false);
     });
 </script>

@@ -283,8 +283,7 @@
         $('#comentarios').html(html);
     }
     function editMovistar() {
-        $('#estadowick_id, #estadodito_id, #linea_claro, #linea_entel, #linea_bitel, #linea_movistar, #clientetipo_id, #ejecutivo_salesforce, #agencia_id, #btn_guardar_movistar')
-            .prop('disabled', false)
+        $('#form-datos-adicionales :input').prop('disabled', false);
     }
     selectEstadoWick({{ $data['cliente']->movistars->last()->estadowick_id ?? 0 }});
 
@@ -447,4 +446,8 @@
             }
         }
     }
+
+    $(document).ready(function () {
+        $('#form-datos-adicionales :input').prop('disabled', true);
+    });
 </script>

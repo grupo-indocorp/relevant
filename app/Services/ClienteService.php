@@ -360,11 +360,14 @@ class ClienteService
         $movistar->linea_entel = request('linea_entel') ?? 0;
         $movistar->linea_bitel = request('linea_bitel') ?? 0;
         $movistar->linea_movistar = request('linea_movistar') ?? 0;
-        $movistar->estadowick_id = request('estadowick_id') ?? null;
-        $movistar->estadodito_id = request('estadodito_id') ?? 1;
-        $movistar->clientetipo_id = request('clientetipo_id') ?? 1;
-        $movistar->ejecutivo_salesforce = request('ejecutivo_salesforce') ?? '';
-        $movistar->agencia_id = request('agencia_id') ?? 1;
+        $movistar->score = request('score') ?? 0;
+        $movistar->cantidad_trabajador = request('cantidad_trabajador') ?? 0;
+        $movistar->cantidad_sucursal = request('cantidad_sucursal') ?? 0;
+        $movistar->estadowick_id = null;
+        $movistar->estadodito_id = 1;
+        $movistar->clientetipo_id = 1;
+        $movistar->ejecutivo_salesforce = '';
+        $movistar->agencia_id = 1;
         $movistar->cliente_id = $cliente->id;
         $movistar->save();
         // Etapa
