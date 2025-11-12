@@ -36,7 +36,7 @@
             {{-- SUCURSALES --}}
             <div class="p-2 mb-0">
                 <div class="d-flex justify-content-between align-items-center">
-                    <x-sistema.titulo title="Sucursales" />
+                    <x-sistema.titulo title="Dirección de Instalación" />
                     <button class="btn btn-sm btn-primary" onclick="toggleSeccion('panel-sucursales', this)">
                         <i class="fa fa-chevron-down"></i>
                     </button>

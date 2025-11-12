@@ -11,39 +11,7 @@
         </div>
     </div>
     <div class="row" id="form-datos-adicionales">
-        @if ($config['datosAdicionales']['lineaClaro'])
-            <div class="col-md-4 mb-3">
-                <label for="score">Score</label>
-                <input class="form-control"
-                    type="number"
-                    id="score"
-                    name="score"
-                    placeholder="0"
-                    value="{{ $movistar->score ?? '' }}">
-            </div>
-        @endif
-        @if ($config['datosAdicionales']['lineaEntel'])
-            <div class="col-md-4 mb-3">
-                <label for="cantidad_trabajador">Cant. Trabajadores</label>
-                <input class="form-control"
-                    type="number"
-                    id="cantidad_trabajador"
-                    name="cantidad_trabajador"
-                    placeholder="0"
-                    value="{{ $movistar->cantidad_trabajador ?? '' }}">
-            </div>
-        @endif
-        @if ($config['datosAdicionales']['lineaBitel'])
-            <div class="col-md-4 mb-3">
-                <label for="cantidad_sucursal">Cant. Sucursales</label>
-                <input class="form-control"
-                    type="number"
-                    id="cantidad_sucursal"
-                    name="cantidad_sucursal"
-                    placeholder="0"
-                    value="{{ $movistar->cantidad_sucursal ?? '' }}">
-            </div>
-        @endif
+        {{-- @if ($config['datosAdicionales']['lineaBitel']) @endif --}}
         <div class="col-md-4 mb-3">
             <label for="linea_claro">Líneas Claro</label>
             <input class="form-control"
