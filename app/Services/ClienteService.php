@@ -195,13 +195,13 @@ class ClienteService
         $capacitador = $user->hasRole('capacitador');
         $planificacion = $user->hasRole('planificacion');
 
-        // if ($sistema || $gerente_general || $gerente_comercial || $asistente_comercial || $capacitador || $planificacion) {
+        if ($sistema || $gerente_general || $gerente_comercial || $asistente_comercial || $capacitador || $planificacion) {
             $data_comentarios = $cliente->comentarios()->orderBy('comentarios.id', 'desc')->get();
-        // } elseif ($supervisor || $jefe_comercial) {
-        //     $data_comentarios = $cliente->comentarios()->orderBy('comentarios.id', 'desc')->limit(5)->get();
-        // } else {
-        //     $data_comentarios = $cliente->comentarios()->where('user_id', $user->id)->orderBy('comentarios.id', 'desc')->limit(5)->get();
-        // }
+        } elseif ($supervisor || $jefe_comercial) {
+            $data_comentarios = $cliente->comentarios()->orderBy('comentarios.id', 'desc')->limit(5)->get();
+        } else {
+            $data_comentarios = $cliente->comentarios()->where('user_id', $user->id)->orderBy('comentarios.id', 'desc')->limit(5)->get();
+        }
         $comentarios = [];
         foreach ($data_comentarios as $value) {
             $comentarios[] = [
