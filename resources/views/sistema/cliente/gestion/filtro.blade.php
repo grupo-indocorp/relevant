@@ -25,16 +25,19 @@
                     <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Sede</th>
                 @endrole
 
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Comentario
-                </th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha de
-                    última Gestión</th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Tipo de Cliente</th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Días sin
-                    Gestión</th>
-
-                @role(['sistema', 'gerente general', 'gerente comercial', 'asistente comercial', 'supervisor',
-                    'capacitador', 'planificacion'])
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Comentario</th>
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha de última Gestión</th>
+                {{-- <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Tipo de Cliente</th> --}}
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Días sin Gestión</th>
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha de Agenda</th>
+                @role([
+                    'sistema',
+                    'gerente general',
+                    'gerente comercial',
+                    'asistente comercial',
+                    'supervisor',
+                    'capacitador',
+                    'planificacion'])
                     <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Etiqueta</th>
                 @endrole
             </tr>
@@ -96,13 +99,11 @@
                         <span
                             class="text-secondary text-xs font-weight-normal">{{ date('d/m/Y H:i:s A', strtotime($value->fecha_gestion)) }}</span>
                     </td>
-                    <td class="align-middle text-center">
-                        <span class="text-xs font-weight-bold mb-0 uppercase"><span
-                                class="text-xs font-weight-bold mb-0 uppercase">
-                                {{ optional($value->movistars->last()?->clientetipo)->nombre ?? '-' }}
-                            </span>
+                    {{-- <td class="align-middle text-center">
+                        <span class="text-xs font-weight-bold mb-0 uppercase">
+                            {{ optional($value->movistars->last()?->clientetipo)->nombre ?? '-' }}
                         </span>
-                    </td>
+                    </td> --}}
                     <td class="align-middle text-center text-sm">
                         @if ($dias >= 60)
                             <span
@@ -112,9 +113,34 @@
                                 class="text-xs font-weight-bold mb-0 px-3 py-1 rounded-lg bg-green-100">{{ $dias }}</span>
                         @endif
                     </td>
+                    <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-normal">
+                            @php
+                                $notificacion = $value->notificacions->last();
+                                $fechaAgenda = optional($notificacion)->fecha;
+                                $horaAgenda = optional($notificacion)->hora;
+                                $formattedDateTime = '';
 
-                    @role(['sistema', 'gerente general', 'gerente comercial', 'asistente comercial', 'supervisor',
-                        'capacitador', 'planificacion'])
+                                if ($fechaAgenda) {
+                                    if ($horaAgenda) {
+                                        $formattedDateTime = date('d/m/Y H:i A', strtotime($fechaAgenda . ' ' . $horaAgenda));
+                                    } else {
+                                        $formattedDateTime = date('d/m/Y', strtotime($fechaAgenda));
+                                    }
+                                }
+                            @endphp
+                            {{ $formattedDateTime }}
+                        </span>
+                    </td>
+
+                    @role([
+                        'sistema',
+                        'gerente general',
+                        'gerente comercial',
+                        'asistente comercial',
+                        'supervisor',
+                        'capacitador',
+                        'planificacion'])
                         <td class="align-middle text-center">
                             @php
                                 $fechaGestion = Carbon\Carbon::parse($value->fecha_gestion)->toDateString();
