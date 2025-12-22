@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Sistema\Cliente;
 
+use App\Models\Contactabilidad;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,6 +22,7 @@ class Comentarios extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.sistema.cliente.comentarios');
+        $contactabilidads = Contactabilidad::all();
+        return view('components.sistema.cliente.comentarios', compact('contactabilidads'));
     }
 }

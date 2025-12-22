@@ -565,6 +565,7 @@ class ClienteGestionController extends Controller
             $comentario->user_id = auth()->user()->id;
             $comentario->cliente_id = $cliente->id;
             $comentario->etiqueta_id = 4; // etiqueta_id, 4=gestionado;
+            $comentario->contactabilidad_id = request('contactabilidad_id');
             $comentario->save();
 
             $data_comentarios = $cliente->comentarios()->where('user_id', auth()->user()->id)->orderBy('comentarios.id', 'desc')->get();
@@ -576,6 +577,7 @@ class ClienteGestionController extends Controller
                     'usuario' => $value->user->name,
                     'fecha' => $value->created_at->format('d-m-Y h:i:s A'),
                     'etiqueta' => $value->etiqueta->nombre,
+                    'contactabilidad' => $value->contactabilidad->nombre ?? '',
                     'detalle' => $value->detalle,
                 ];
             }
@@ -627,6 +629,7 @@ class ClienteGestionController extends Controller
             $comentario->detalle = 'Cambio de etapa a ' . $etapa->nombre;
             $comentario->user_id = auth()->user()->id;
             $comentario->cliente_id = $cliente->id;
+            $comentario->contactabilidad_id = request('contactabilidad_id');
             $comentario->save();
 
             $data_comentarios = $cliente->comentarios()->where('user_id', auth()->user()->id)->orderBy('comentarios.id', 'desc')->limit(5)->get();
@@ -638,6 +641,7 @@ class ClienteGestionController extends Controller
                     'usuario' => $value->user->name,
                     'fecha' => $value->created_at->format('d-m-Y h:i:s A'),
                     'etiqueta' => $value->etiqueta->nombre,
+                    'contactabilidad' => $value->contactabilidad->nombre ?? '',
                     'detalle' => $value->detalle,
                 ];
             }

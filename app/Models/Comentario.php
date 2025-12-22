@@ -24,4 +24,9 @@ class Comentario extends Model
     {
         return $this->belongsTo(Etiqueta::class);
     }
+
+    public function contactabilidad()
+    {
+        return $this->belongsTo(Contactabilidad::class);
+    }
 }

@@ -247,6 +247,7 @@
             data: {
                 view: 'update-comentario',
                 comentario: $('#comentario').val(),
+                contactabilidad_id: $('input[name="contactabilidad_id"]:checked').val(),
             },
             success: function(result) {
                 $('#comentario').val('');
@@ -261,24 +262,19 @@
     function listComentario(comentarios) {
         let html = "";
         comentarios.forEach(function(comentario) {
-            html += `<div class="mb-4" id="${comentario.id}">
-                        <span class="text-slate-900 text-base font-semibold">${comentario.comentario}</span>
-                        <div class="text-end">
-                            <span class="text-slate-500 text-xs uppercase me-2">
-                                <i class="text-blue-400 fa-solid fa-user"></i> ${comentario.usuario}
-                            </span>
-                            <span class="text-slate-500 text-sm">
-                                <i class="text-blue-400 fa-solid fa-calendar-days"></i> ${comentario.fecha}
-                            </span>
-                            <span class="bg-slate-300 text-slate-700 text-xs font-semibold font-se mb-0 mx-1 px-3 py-1 rounded-lg">
-                                ${comentario.etiqueta}
-                            </span>
-                            <span class="bg-slate-300 text-slate-700 text-xs font-semibold font-se mb-0 mx-1 px-3 py-1 rounded-lg">
-                                ${comentario.detalle}
-                            </span>
+            html += `<div class="border rounded px-3 py-2 mb-2 bg-white shadow-sm" id="${comentario.id}">
+                        <div class="mb-1 text-m text-orange-600 fw-semibold d-flex align-items-start">
+                            <i class="fa-solid fa-comment text-orange-400 me-2 mt-1"></i>
+                            <span>${comentario.comentario}</span>
                         </div>
-                    </div>
-                    <hr>`;
+                        <div class="text-xs text-muted d-flex flex-wrap gap-3 justify-end">
+                            <span><i class="fa-solid fa-user me-1"></i>${comentario.usuario}</span>
+                            <span><i class="fa-solid fa-tag me-1"></i>${comentario.etiqueta}</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i>${comentario.contactabilidad}</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i>${comentario.detalle}</span>
+                            <span><i class="fa-solid fa-calendar-days me-1"></i>${comentario.fecha}</span>
+                        </div>
+                    </div>`;
         })
         $('#comentarios').html(html);
     }
@@ -373,6 +369,7 @@
                 view: 'update-etapa',
                 etapa_id: $("#etapa_id option:selected").val(),
                 comentario: $('#comentario').val(),
+                contactabilidad_id: $('input[name="contactabilidad_id"]:checked').val(),
             },
             success: function(result) {
                 $('#comentario').val('');

@@ -133,7 +133,7 @@
                 sucursal_provincia_codigo: $('#sucursal_provincia_codigo').val(),
                 sucursal_distrito_codigo: $('#sucursal_distrito_codigo').val(),
                 // comentario
-                contactabilidad: $('#contactabilidad').is(':checked'),
+                contactabilidad_id: $('input[name="contactabilidad_id"]:checked').val(),
                 comentario: $('#comentario').val(),
                 // movistar
                 linea_claro: $('#linea_claro').val() ?? 0,

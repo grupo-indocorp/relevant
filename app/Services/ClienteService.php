@@ -210,6 +210,7 @@ class ClienteService
                 'usuario' => $value->user->name,
                 'fecha' => $value->created_at->format('d-m-Y h:i:s A'),
                 'etiqueta' => $value->etiqueta->nombre,
+                'contactabilidad' => $value->contactabilidad->nombre ?? '',
                 'detalle' => $value->detalle,
             ];
         }
@@ -356,6 +357,7 @@ class ClienteService
         $comentario->user_id = $user->id;
         $comentario->cliente_id = $cliente->id;
         $comentario->etiqueta_id = 1; // etiqueta_id, 1=nuevo;
+        $comentario->contactabilidad_id = request('contactabilidad_id');
         $comentario->save();
         // Movistar
         $movistar = new Movistar;
