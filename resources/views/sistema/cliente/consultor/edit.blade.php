@@ -25,6 +25,7 @@
                     view: 'update-solicitar',
                     comentario: $('#comentario').val(),
                     etapa_id: $('#etapa_id').val(),
+                    contactabilidad_id: $('input[name="contactabilidad_id"]:checked').val(),
                 },
                 success: function( result ) {
                     location.reload();

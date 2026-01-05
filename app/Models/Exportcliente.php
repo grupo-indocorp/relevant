@@ -14,4 +14,10 @@ class Exportcliente extends Model
     {
         return $this->hasOne(Cliente::class);
     }
+
+    // Relación uno a muchos inversa
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'ejecutivo_id');
+    }
 }

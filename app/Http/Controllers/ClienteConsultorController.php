@@ -119,6 +119,7 @@ class ClienteConsultorController extends Controller
             $comentario->cliente_id = $cliente->id;
             $comentario->user_id = $ejecutivo->id;
             $comentario->etiqueta_id = 3; // etiqueta_id, 3=solicitado;
+            $comentario->contactabilidad_id = request('contactabilidad_id');
             $comentario->save();
             $this->clienteService->exportclienteStore($cliente->id);
         }
