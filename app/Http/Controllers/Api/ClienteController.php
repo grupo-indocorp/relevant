@@ -29,6 +29,9 @@ class ClienteController extends Controller
             'provincia_codigo' => $cliente->provincia_codigo,
             'distrito_codigo' => $cliente->distrito_codigo,
             'fecha_gestion' => $cliente->fecha_gestion,
+            'equipo' => $cliente->equipo->nombre,
+            'ejecutivo' => $cliente->user->name,
+            'etapa' => $cliente->etapa->nombre,
         ]);
     }
 }
