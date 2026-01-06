@@ -122,7 +122,7 @@ class IndotechFunnelExport
             // Escribir los datos
             $this->query()->chunk(1000, function ($clientes) use ($file) {
                 foreach ($clientes as $cliente) {
-                    $cliente->ejecutivo_equipo = $cliente->user?->equipos->last()?->nombre;
+                    // $cliente->ejecutivo_equipo = $cliente->user?->equipos->last()?->nombre;
 
                     $row = $this->map($cliente);
                     // Convertir cada campo a UTF-8 si es necesario
