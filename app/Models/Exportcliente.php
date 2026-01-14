@@ -12,6 +12,7 @@ class Exportcliente extends Model
     // Relación uno a uno
     public function cliente()
     {
-        return $this->hasOne(Cliente::class);
+        return $this->belongsTo(Cliente::class); //Antes era asi return $this->hasOne(Cliente::class);
     }
+
 }

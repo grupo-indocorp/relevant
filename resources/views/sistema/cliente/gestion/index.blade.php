@@ -241,26 +241,9 @@
             function exportFunnel(empresa) {
                 let filtro = $('#data_filtro').val();
 
-                $.ajax({
-                    url: `/export/${empresa}/funnel?filtro=${filtro}`,
-                    method: "GET",
-                    xhrFields: {
-                        responseType: 'blob' // Indicar que la respuesta es un archivo binario
-                    },
-                    success: function(data) {
-                        // Crear un enlace temporal para descargar el archivo
-                        let blob = new Blob([data], {
-                            type: 'text/csv'
-                        });
-                        let link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = 'IndotechFunnelExport.csv';
-                        link.click();
-                    },
-                    error: function(response) {
-                        console.log('Error al descargar el archivo');
-                    }
-                });
+                // Navegación directa para descarga (más fiable para respuestas en streaming)
+                const url = `/export/${empresa}/funnel?filtro=${encodeURIComponent(filtro)}`;
+                window.location.href = url;
             }
         </script>
     @endsection
