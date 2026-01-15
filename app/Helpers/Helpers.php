@@ -171,7 +171,7 @@ class Helpers
      *
      * @return array where para Exportcliente
      */
-    public static function filtroExportCliente($filtro, $user)
+    public static function filtroExportCliente($filtro, $user, bool $skipRoleRestrictions = false)
     {
         $where = [];
         if (isset($filtro->filtro_ruc)) {
@@ -180,27 +180,43 @@ class Helpers
         if ($filtro->filtro_etapa_id != 0) {
             $where[] = ['etapa_id', $filtro->filtro_etapa_id];
         }
-        if ($user->hasRole('ejecutivo')) {
-            $where[] = ['ejecutivo_id', $user->id];
+
+        // Restringir por rol a menos que se indique lo contrario
+        if (! $skipRoleRestrictions) {
+            if ($user->hasRole('ejecutivo')) {
+                $where[] = ['ejecutivo_id', $user->id];
+            } else {
+                if ($filtro->filtro_user_id != 0) {
+                    $where[] = ['ejecutivo_id', $filtro->filtro_user_id];
+                }
+            }
+            if ($user->hasRole('supervisor')) {
+                $where[] = ['ejecutivo_equipo_id', $user->equipo->id];
+            } else {
+                if ($filtro->filtro_equipo_id != 0) {
+                    $where[] = ['ejecutivo_equipo_id', $filtro->filtro_equipo_id];
+                }
+            }
+            if ($user->hasRole('gerente comercial') || $user->hasRole('supervisor') || $user->hasRole('ejecutivo')) {
+                $where[] = ['ejecutivo_sede_id', $user->sede_id];
+            } else { // administrador, sistema
+                if ($filtro->filtro_sede_id != 0) {
+                    $where[] = ['ejecutivo_sede_id', $filtro->filtro_sede_id];
+                }
+            }
         } else {
+            // Si se omiten restricciones de rol, permitir filtro por user/equipo/sede si vienen en el payload
             if ($filtro->filtro_user_id != 0) {
                 $where[] = ['ejecutivo_id', $filtro->filtro_user_id];
             }
-        }
-        if ($user->hasRole('supervisor')) {
-            $where[] = ['ejecutivo_equipo_id', $user->equipo->id];
-        } else {
             if ($filtro->filtro_equipo_id != 0) {
                 $where[] = ['ejecutivo_equipo_id', $filtro->filtro_equipo_id];
             }
-        }
-        if ($user->hasRole('gerente comercial') || $user->hasRole('supervisor') || $user->hasRole('ejecutivo')) {
-            $where[] = ['ejecutivo_sede_id', $user->sede_id];
-        } else { // administrador, sistema
             if ($filtro->filtro_sede_id != 0) {
                 $where[] = ['ejecutivo_sede_id', $filtro->filtro_sede_id];
             }
         }
+
         if (isset($filtro->filtro_fecha_desde)) {
             $where[] = ['fecha_ultimo_contacto', '>=', $filtro->filtro_fecha_desde.' 00:00:00'];
         }
