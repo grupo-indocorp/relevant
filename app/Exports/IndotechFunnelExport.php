@@ -3,11 +3,10 @@
 namespace App\Exports;
 
 use App\Helpers\Helpers;
-use App\Models\Exportcliente;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\Database\Eloquent\Builder;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class IndotechFunnelExport
 {
@@ -34,23 +33,64 @@ class IndotechFunnelExport
     }
 
 
-    public function query(): Builder
+    /**
+     * Obtiene los datos directamente de clientes construyendo exportclientes al vuelo
+     * No depende de la tabla exportclientes (que puede estar vacía)
+     */
+    public function getExportData($limit, $offset)
     {
-        $where = Helpers::filtroExportCliente(json_decode($this->filtro), $this->user, $this->skipRoleRestrictions);
-
-        return Exportcliente::query()
-            ->join('clientes', 'clientes.id', '=', 'exportclientes.cliente_id')
-            ->leftJoin('users', 'users.id', '=', 'exportclientes.ejecutivo_id')
-            ->whereIn('exportclientes.id', function ($q) use ($where) {
-                $q->selectRaw('MAX(exportclientes.id)')
-                  ->from('exportclientes')
-                  ->join('clientes', 'clientes.id', '=', 'exportclientes.cliente_id')
-                  ->when(!empty($where), function ($q) use ($where) { return $q->where($where); })
-                  ->groupBy('clientes.ruc');
-            })
-            ->when(!empty($where), function ($q) use ($where) { return $q->where($where); })
-            ->select('exportclientes.*', 'clientes.ruc', 'users.email as ejecutivo_email')
-            ->orderBy('exportclientes.id');
+        $sql = "
+            SELECT 
+                c.id as cliente_id,
+                COALESCE(eq.nombre, '') as ejecutivo_equipo,
+                COALESCE(u.name, '') as ejecutivo,
+                COALESCE(c.user_id, 0) as ejecutivo_id,
+                COALESCE(u.email, '') as ejecutivo_email,
+                c.ruc,
+                c.razon_social,
+                c.ciudad,
+                COALESCE((SELECT nombre FROM contactos WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), '') as contacto,
+                COALESCE((SELECT celular FROM contactos WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), '') as contacto_celular,
+                COALESCE((SELECT correo FROM contactos WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), '') as contacto_email,
+                COALESCE((SELECT estadowick_id FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), '') as estado_wick,
+                COALESCE((SELECT estadodito_id FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), '') as estado_dito,
+                COALESCE((SELECT linea_claro FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), 0) as lineas_claro,
+                COALESCE((SELECT linea_entel FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), 0) as lineas_entel,
+                COALESCE((SELECT linea_bitel FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), 0) as lineas_bitel,
+                COALESCE((SELECT linea_movistar FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1), 0) as lineas_movistar,
+                COALESCE(et.nombre, '') as etapa,
+                DATE(c.created_at) as fecha_creacion,
+                DATE(c.fecha_gestion) as fecha_ultimo_contacto,
+                0 as producto_categoria_1,
+                0 as producto_categoria_1_total,
+                0 as producto_categoria_2,
+                0 as producto_categoria_2_total,
+                0 as producto_categoria_3,
+                0 as producto_categoria_3_total,
+                COALESCE((SELECT comentario FROM comentarios WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1 OFFSET 0), '') as comentario_5,
+                COALESCE((SELECT comentario FROM comentarios WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1 OFFSET 1), '') as comentario_4,
+                COALESCE((SELECT comentario FROM comentarios WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1 OFFSET 2), '') as comentario_3,
+                COALESCE((SELECT comentario FROM comentarios WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1 OFFSET 3), '') as comentario_2,
+                COALESCE((SELECT comentario FROM comentarios WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1 OFFSET 4), '') as comentario_1,
+                COALESCE((SELECT nombre FROM clientetipos WHERE id = (SELECT clientetipo_id FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1) LIMIT 1), '') as cliente_tipo,
+                COALESCE((SELECT nombre FROM agencias WHERE id = (SELECT agencia_id FROM movistars WHERE cliente_id = c.id ORDER BY id DESC LIMIT 1) LIMIT 1), '') as agencia
+            FROM clientes c
+            LEFT JOIN users u ON u.id = c.user_id
+            LEFT JOIN equipos eq ON eq.id = c.equipo_id
+            LEFT JOIN etapas et ON et.id = c.etapa_id
+            WHERE c.ruc IS NOT NULL AND c.ruc != ''
+            ORDER BY c.id
+            LIMIT ? OFFSET ?
+        ";
+        
+        try {
+            $results = DB::select($sql, [$limit, $offset]);
+            Log::debug('Query executed successfully', ['limit' => $limit, 'offset' => $offset, 'result_count' => count($results)]);
+            return $results;
+        } catch (\Exception $e) {
+            Log::error('Query failed', ['error' => $e->getMessage(), 'sql' => substr($sql, 0, 200)]);
+            throw $e;
+        }
     }
 
     public function headings(): array
@@ -72,6 +112,7 @@ class IndotechFunnelExport
             'Líneas Claro',
             'Líneas Entel',
             'Líneas Bitel',
+            'Líneas Movistar',
             'Etapa de Negociación',
             'Fecha Primer Contacto',
             'Fecha Último Contacto',
@@ -91,9 +132,7 @@ class IndotechFunnelExport
         ];
     }
 
-    /**
-     * Normaliza y convierte un valor a string seguro para CSV
-     */
+
     protected function normalizeValue(mixed $value): string
     {
         if (is_null($value)) {
@@ -123,112 +162,112 @@ class IndotechFunnelExport
         return $str;
     }
 
-    public function map(Exportcliente $cliente): array
+    public function mapRow(array $row): array
     {
         return [
-            $this->normalizeValue($cliente->cliente_id ?? ''),
-            $this->normalizeValue($cliente->ejecutivo_equipo ?? ''),
-            $this->normalizeValue($cliente->ejecutivo ?? ''),
-            $this->normalizeValue($cliente->ejecutivo_id ?? ''),
-            $this->normalizeValue($cliente->ejecutivo_email ?? ''),
-            $this->normalizeValue($cliente->ruc ?? ''),
-            $this->normalizeValue($cliente->razon_social ?? ''),
-            $this->normalizeValue($cliente->ciudad ?? ''),
-            $this->normalizeValue($cliente->contacto ?? ''),
-            $this->normalizeValue($cliente->contacto_celular ?? ''),
-            $this->normalizeValue($cliente->contacto_email ?? ''),
-            $this->normalizeValue($cliente->estado_wick ?? ''),
-            $this->normalizeValue($cliente->estado_dito ?? ''),
-            $this->normalizeValue($cliente->lineas_claro ?? ''),
-            $this->normalizeValue($cliente->lineas_entel ?? ''),
-            $this->normalizeValue($cliente->lineas_bitel ?? ''),
-            $this->normalizeValue($cliente->etapa ?? ''),
-            $this->normalizeValue($cliente->fecha_creacion ?? ''),
-            $this->normalizeValue($cliente->fecha_ultimo_contacto ?? ''),
-            $this->normalizeValue($cliente->producto_categoria_1 ?? ''),
-            $this->normalizeValue($cliente->producto_categoria_1_total ?? ''),
-            $this->normalizeValue($cliente->producto_categoria_2 ?? ''),
-            $this->normalizeValue($cliente->producto_categoria_2_total ?? ''),
-            $this->normalizeValue($cliente->producto_categoria_3 ?? ''),
-            $this->normalizeValue($cliente->producto_categoria_3_total ?? ''),
-            $this->normalizeValue($cliente->comentario_5 ?? ''),
-            $this->normalizeValue($cliente->comentario_4 ?? ''),
-            $this->normalizeValue($cliente->comentario_3 ?? ''),
-            $this->normalizeValue($cliente->comentario_2 ?? ''),
-            $this->normalizeValue($cliente->comentario_1 ?? ''),
-            $this->normalizeValue($cliente->cliente_tipo ?? ''),
-            $this->normalizeValue($cliente->agencia ?? ''),
+            $this->normalizeValue($row['cliente_id'] ?? ''),
+            $this->normalizeValue($row['ejecutivo_equipo'] ?? ''),
+            $this->normalizeValue($row['ejecutivo'] ?? ''),
+            $this->normalizeValue($row['ejecutivo_id'] ?? ''),
+            $this->normalizeValue($row['ejecutivo_email'] ?? ''),
+            $this->normalizeValue($row['ruc'] ?? ''),
+            $this->normalizeValue($row['razon_social'] ?? ''),
+            $this->normalizeValue($row['ciudad'] ?? ''),
+            $this->normalizeValue($row['contacto'] ?? ''),
+            $this->normalizeValue($row['contacto_celular'] ?? ''),
+            $this->normalizeValue($row['contacto_email'] ?? ''),
+            $this->normalizeValue($row['estado_wick'] ?? ''),
+            $this->normalizeValue($row['estado_dito'] ?? ''),
+            $this->normalizeValue($row['lineas_claro'] ?? ''),
+            $this->normalizeValue($row['lineas_entel'] ?? ''),
+            $this->normalizeValue($row['lineas_bitel'] ?? ''),
+            $this->normalizeValue($row['lineas_movistar'] ?? ''),
+            $this->normalizeValue($row['etapa'] ?? ''),
+            $this->normalizeValue($row['fecha_creacion'] ?? ''),
+            $this->normalizeValue($row['fecha_ultimo_contacto'] ?? ''),
+            $this->normalizeValue($row['producto_categoria_1'] ?? ''),
+            $this->normalizeValue($row['producto_categoria_1_total'] ?? ''),
+            $this->normalizeValue($row['producto_categoria_2'] ?? ''),
+            $this->normalizeValue($row['producto_categoria_2_total'] ?? ''),
+            $this->normalizeValue($row['producto_categoria_3'] ?? ''),
+            $this->normalizeValue($row['producto_categoria_3_total'] ?? ''),
+            $this->normalizeValue($row['comentario_5'] ?? ''),
+            $this->normalizeValue($row['comentario_4'] ?? ''),
+            $this->normalizeValue($row['comentario_3'] ?? ''),
+            $this->normalizeValue($row['comentario_2'] ?? ''),
+            $this->normalizeValue($row['comentario_1'] ?? ''),
+            $this->normalizeValue($row['cliente_tipo'] ?? ''),
+            $this->normalizeValue($row['agencia'] ?? ''),
         ];
     }
 
     public function exportToCsv(): StreamedResponse
     {
         $headers = $this->headings();
+        $normalizedHeaders = array_map([$this, 'normalizeValue'], $headers);
         $filename = $this->filename;
+        $chunkSize = $this->chunkSize;
+        $addBom = $this->addBom;
+        $exporterInstance = $this;
 
-        // Log count for debug purposes
-        try {
-            $count = $this->query()->count();
-            Log::info('Indotech export count: ' . $count, ['filename' => $filename, 'chunkSize' => $this->chunkSize]);
-        } catch (\Throwable $e) {
-            Log::error('Error al calcular count en Indotech export: ' . $e->getMessage());
-            $count = 0;
-        }
-
-        $callback = function () use ($headers, $count, $filename) {
+        $callback = function () use ($normalizedHeaders, $filename, $chunkSize, $addBom, $exporterInstance) {
             $file = fopen('php://output', 'w');
 
-            if ($this->addBom) {
-                // Agregar BOM para Excel/UTF-8
-                fwrite($file, "\xEF\xBB\xBF");
-            }
-
-            // Escribir las cabeceras
-            fputcsv($file, array_map([$this, 'normalizeValue'], $headers));
-
-            // Escribir los datos
-            $this->query()->chunk(1000, function ($clientes) use ($file) {
-                foreach ($clientes as $cliente) {
-                    // $cliente->ejecutivo_equipo = $cliente->user?->equipos->last()?->nombre;
-
-                    $row = $this->map($cliente);
-                    // Convertir cada campo a UTF-8 si es necesario
-                    $row = array_map(function ($value) {
-                        return mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                    }, $row);
-                    fputcsv($file, $row);
-                }
-            });
-            // Si no hay filas en exportclientes, intentar exportar directo desde clientes (fallback)
-            if ($count === 0) {
-                Log::warning('Indotech export: no rows in exportclientes, using fallback export from clientes', ['filename' => $filename]);
-                try {
-                    $this->exportFromClientes($file);
-                    fclose($file);
-                    return;
-                } catch (\Throwable $e) {
-                    Log::error('Fallback exportFromClientes failed: ' . $e->getMessage());
-                    fputcsv($file, ['ERROR', 'Fallback export failed, check logs']);
-                    fclose($file);
-                    return;
-                }
-            }
-
-            // Escribir los datos por chunks para ahorrar memoria
             try {
-                $this->query()->chunk($this->chunkSize, function ($clientes) use ($file) {
-                    foreach ($clientes as $cliente) {
-                        $row = $this->map($cliente);
-                        fputcsv($file, $row);
-                    }
-                });
-            } catch (\Throwable $e) {
-                Log::error('Error during streaming Indotech export: ' . $e->getMessage());
-                // Indicar un error en el CSV para facilitar diagnóstico
-                fputcsv($file, ['ERROR', 'Error during export, check logs']);
-            }
+                if ($addBom) {
+                    fwrite($file, "\xEF\xBB\xBF");
+                }
 
-            fclose($file);
+                fputcsv($file, $normalizedHeaders, ',', '"', '\\');
+
+                $processed = 0;
+                $limit = $chunkSize;
+                $offset = 0;
+                
+                Log::info('Starting Indotech export', ['filename' => $filename, 'chunk_size' => $limit]);
+                
+                while (true) {
+                    try {
+                        $rows = $exporterInstance->getExportData($limit, $offset);
+                        
+                        Log::info('Retrieved rows from DB', ['count' => count($rows), 'offset' => $offset, 'limit' => $limit]);
+                        
+                        if (empty($rows)) {
+                            Log::info('No more rows to process');
+                            break;
+                        }
+                        
+                        foreach ($rows as $row) {
+                            $rowArray = (array) $row;
+                            $csvRow = $exporterInstance->mapRow($rowArray);
+                            fputcsv($file, $csvRow, ',', '"', '\\');
+                            $processed++;
+                        }
+                        
+                        Log::info('Indotech export progress', ['processed' => $processed, 'offset' => $offset]);
+                        
+                        if (function_exists('set_time_limit')) {
+                            set_time_limit(300);
+                        }
+                        
+                        $offset += $limit;
+                        
+                    } catch (\Throwable $e) {
+                        Log::error('Error in export loop at offset ' . $offset, ['error' => $e->getMessage()]);
+                        throw $e;
+                    }
+                }
+                
+                Log::info('Indotech export completed', ['total_records' => $processed, 'filename' => $filename]);
+                
+            } catch (\Throwable $e) {
+                Log::error('Error during streaming Indotech export: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                fputcsv($file, ['ERROR', 'Error during export: ' . substr($e->getMessage(), 0, 100)]);
+            } finally {
+                if (is_resource($file)) {
+                    fclose($file);
+                }
+            }
         };
 
         $responseHeaders = [
@@ -241,88 +280,5 @@ class IndotechFunnelExport
         ];
 
         return response()->stream($callback, 200, $responseHeaders);
-    }
-
-    /**
-     * Fallback: exportar directamente desde la tabla clientes cuando no hay filas en exportclientes
-     * Es una exportación ligera que intenta reconstruir campos relevantes.
-     */
-    protected function exportFromClientes($file)
-    {
-        // Aplicar los mismos filtros que en exportclientes
-        $where = \App\Helpers\Helpers::filtroExportCliente(json_decode($this->filtro), $this->user, $this->skipRoleRestrictions);
-
-        // Usar relaciones para minimizar N+1
-        \App\Models\Cliente::with(['user', 'equipo', 'sede', 'etapa', 'contactos', 'movistars', 'ventas.productos.categoria'])
-            ->when(!empty($where), function ($q) use ($where) { return $q->where($where); })
-            ->orderBy('id')
-            ->chunk($this->chunkSize, function ($clientes) use ($file) {
-                foreach ($clientes as $cliente) {
-                    // Construir una fila aproximada similar a la original
-                    $ventas = $cliente->ventas->last();
-                    $venta_id = $ventas->id ?? '';
-
-                    // Calcular sumas por categoría (movil=2, fija=3, avanzada=4)
-                    $m_cant = $m_carf = $f_cant = $f_carf = $a_cant = $a_carf = 0;
-                    if ($ventas) {
-                        foreach ($ventas->productos as $item) {
-                            if ($item->categoria_id === 2) {
-                                $m_cant += $item->pivot->cantidad;
-                                $m_carf += $item->pivot->total;
-                            } elseif ($item->categoria_id === 3) {
-                                $f_cant += $item->pivot->cantidad;
-                                $f_carf += $item->pivot->total;
-                            } elseif ($item->categoria_id === 4) {
-                                $a_cant += $item->pivot->cantidad;
-                                $a_carf += $item->pivot->total;
-                            }
-                        }
-                    }
-
-                    $comentarios = $cliente->comentarios()->latest()->take(5)->get();
-                    $comentariosArray = $comentarios->toArray();
-                    $textoPredeterminado = '';
-                    while (count($comentariosArray) < 5) {
-                        $comentariosArray[] = ['comentario' => $textoPredeterminado];
-                    }
-
-                    $row = [
-                        $this->normalizeValue($cliente->id),
-                        $this->normalizeValue($cliente->equipo->nombre ?? ''),
-                        $this->normalizeValue($cliente->user->name ?? ''),
-                        $this->normalizeValue($cliente->user->id ?? ''),
-                        $this->normalizeValue($cliente->user->email ?? ''),
-                        $this->normalizeValue($cliente->ruc ?? ''),
-                        $this->normalizeValue($cliente->razon_social ?? ''),
-                        $this->normalizeValue($cliente->ciudad ?? ''),
-                        $this->normalizeValue($cliente->contactos->last()->nombre ?? ''),
-                        $this->normalizeValue($cliente->contactos->last()->celular ?? ''),
-                        $this->normalizeValue($cliente->contactos->last()->correo ?? ''),
-                        $this->normalizeValue($cliente->movistars->last()->estadowick->nombre ?? ''),
-                        $this->normalizeValue($cliente->movistars->last()->estadodito->nombre ?? ''),
-                        $this->normalizeValue($cliente->movistars->last()->linea_claro ?? '0'),
-                        $this->normalizeValue($cliente->movistars->last()->linea_entel ?? '0'),
-                        $this->normalizeValue($cliente->movistars->last()->linea_bitel ?? '0'),
-                        $this->normalizeValue($cliente->etapa->nombre ?? ''),
-                        $this->normalizeValue($cliente->created_at->format('Y-m-d') ?? ''),
-                        $this->normalizeValue($cliente->fecha_gestion ?? ''),
-                        $this->normalizeValue($m_cant),
-                        $this->normalizeValue($m_carf),
-                        $this->normalizeValue($f_cant),
-                        $this->normalizeValue($f_carf),
-                        $this->normalizeValue($a_cant),
-                        $this->normalizeValue($a_carf),
-                        $this->normalizeValue($comentariosArray[0]['comentario'] ?? ''),
-                        $this->normalizeValue($comentariosArray[1]['comentario'] ?? ''),
-                        $this->normalizeValue($comentariosArray[2]['comentario'] ?? ''),
-                        $this->normalizeValue($comentariosArray[3]['comentario'] ?? ''),
-                        $this->normalizeValue($comentariosArray[4]['comentario'] ?? ''),
-                        $this->normalizeValue($cliente->movistars->last()->clientetipo->nombre ?? ''),
-                        $this->normalizeValue($cliente->movistars->last()->agencia->nombre ?? ''),
-                    ];
-
-                    fputcsv($file, $row);
-                }
-            });
     }
 }
