@@ -12,15 +12,15 @@ class NotificaciontipoSeeder extends Seeder
      */
     public function run(): void
     {
-        Notificaciontipo::factory()->create([
+        Notificaciontipo::create([
             'nombre' => 'General',
         ]);
 
-        Notificaciontipo::factory()->create([
+        Notificaciontipo::create([
             'nombre' => 'Cita',
         ]);
 
-        Notificaciontipo::factory()->create([
+        Notificaciontipo::create([
             'nombre' => 'Llamada',
         ]);
     }

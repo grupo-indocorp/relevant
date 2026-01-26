@@ -12,37 +12,37 @@ class EtapaSeeder extends Seeder
      */
     public function run(): void
     {
-        Etapa::factory()->create([
+        Etapa::create([
             'nombre' => 'Oportunidades',
             'color' => '#f97516',
             'opacity' => '#f975164d',
             'orden' => 10,
         ]);
-        Etapa::factory()->create([
+        Etapa::create([
             'nombre' => 'Prospectos',
             'color' => '#f97516',
             'opacity' => '#f975164d',
             'orden' => 20,
         ]);
-        Etapa::factory()->create([
+        Etapa::create([
             'nombre' => 'Pre Clientes',
             'color' => '#f97516',
             'opacity' => '#f975164d',
             'orden' => 30,
         ]);
-        Etapa::factory()->create([
+        Etapa::create([
             'nombre' => 'Ventas',
             'color' => '#f97516',
             'opacity' => '#f975164d',
             'orden' => 40,
         ]);
-        Etapa::factory()->create([
+        Etapa::create([
             'nombre' => 'No Vendidos',
             'color' => '#f97516',
             'opacity' => '#f975164d',
             'orden' => 50,
         ]);
-        Etapa::factory()->create([
+        Etapa::create([
             'nombre' => 'Clientes Reportados',
             'color' => '#f97516',
             'opacity' => '#f975164d',

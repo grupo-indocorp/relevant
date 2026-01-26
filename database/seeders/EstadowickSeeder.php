@@ -12,15 +12,15 @@ class EstadowickSeeder extends Seeder
      */
     public function run(): void
     {
-        Estadowick::factory()->create([
+        Estadowick::create([
             'nombre' => 'APROBADO',
         ]);
 
-        Estadowick::factory()->create([
+        Estadowick::create([
             'nombre' => 'OBSERVADO',
         ]);
 
-        Estadowick::factory()->create([
+        Estadowick::create([
             'nombre' => 'RECHAZADO',
         ]);
     }

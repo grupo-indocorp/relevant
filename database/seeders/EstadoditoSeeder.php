@@ -12,15 +12,15 @@ class EstadoditoSeeder extends Seeder
      */
     public function run(): void
     {
-        Estadodito::factory()->create([
+        Estadodito::create([
             'nombre' => 'FINANCIADO',
         ]);
 
-        Estadodito::factory()->create([
+        Estadodito::create([
             'nombre' => 'UPFRONT',
         ]);
 
-        Estadodito::factory()->create([
+        Estadodito::create([
             'nombre' => 'BLOQUEADO',
         ]);
     }

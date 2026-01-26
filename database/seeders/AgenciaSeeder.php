@@ -12,15 +12,15 @@ class AgenciaSeeder extends Seeder
      */
     public function run(): void
     {
-        Agencia::factory()->create([
+        Agencia::create([
             'nombre' => 'INDOTECH',
         ]);
 
-        Agencia::factory()->create([
+        Agencia::create([
             'nombre' => 'VACANTE',
         ]);
 
-        Agencia::factory()->create([
+        Agencia::create([
             'nombre' => 'OTROS',
         ]);
     }

@@ -12,11 +12,11 @@ class SedeSeeder extends Seeder
      */
     public function run(): void
     {
-        Sede::factory()->create([
+        Sede::create([
             'nombre' => 'Huancayo',
         ]);
 
-        Sede::factory()->create([
+        Sede::create([
             'nombre' => 'Lima',
         ]);
     }
