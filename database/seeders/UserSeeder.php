@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::factory()->create([
+        $user = User::create([
             'name' => 'Abraham Alanya',
             'email' => 'abrahamalanya@laravel.com',
             'password' => bcrypt('abrahamalanya'),
