@@ -12,23 +12,23 @@ class ProductoSeeder extends Seeder
      */
     public function run(): void
     {
-        Producto::factory()->create([
+        Producto::create([
             'nombre' => 'SOHO',
             'categoria_id' => 1,
         ]);
-        Producto::factory()->create([
+        Producto::create([
             'nombre' => 'Internet Empresas',
             'categoria_id' => 1,
         ]);
-        Producto::factory()->create([
+        Producto::create([
             'nombre' => 'BUNDLE',
             'categoria_id' => 1,
         ]);
-        Producto::factory()->create([
+        Producto::create([
             'nombre' => 'GPON',
             'categoria_id' => 1,
         ]);
-        Producto::factory()->create([
+        Producto::create([
             'nombre' => 'Internet Dedicado',
             'categoria_id' => 1,
         ]);
