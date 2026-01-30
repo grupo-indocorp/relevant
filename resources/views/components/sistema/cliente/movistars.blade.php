@@ -48,6 +48,24 @@
                 placeholder="0"
                 value="{{ $movistar->linea_bitel ?? '' }}">
         </div>
+        <div class="col-md-4 mb-3">
+            <label for="cantidad_sucursal">Sedes</label>
+            <input class="form-control"
+                type="number"
+                id="cantidad_sucursal"
+                name="cantidad_sucursal"
+                placeholder="0"
+                value="{{ $movistar->cantidad_sucursal ?? '' }}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="cantidad_trabajador">Cant. Trabajadores</label>
+            <input class="form-control"
+                type="number"
+                id="cantidad_trabajador"
+                name="cantidad_trabajador"
+                placeholder="0"
+                value="{{ $movistar->cantidad_trabajador ?? '' }}">
+        </div>
     </div>
 
     {{ $botonFooter }}
