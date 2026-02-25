@@ -98,7 +98,7 @@ Route::middleware([
 
     // Exportación e importación de clientes
     Route::get('clientes/export/', [GestionClienteController::class, 'export']);
-    Route::post('clientes/import/', [GestionClienteController::class, 'import']);
+    Route::post('clientes/import/', [GestionClienteController::class, 'import'])->name('import.cliente');
 
     // Actualización de datos de clientes
     Route::get('upcf', [ConfiguracionController::class, 'updateCuentaFinanciera'])->name('update.cuentafinanciera');

@@ -10,8 +10,7 @@
                         </div>
                     </th>
                 @endcan
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">RUC</th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social</th>
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social / RUC</th>
 
                 @role(['sistema', 'gerente general', 'gerente comercial', 'asistente comercial', 'jefe comercial',
                     'supervisor', 'capacitador', 'planificacion'])
@@ -27,7 +26,7 @@
 
                 <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Comentario</th>
                 <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha de última Gestión</th>
-                {{-- <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Tipo de Cliente</th> --}}
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Tipo de Base</th>
                 <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Días sin Gestión</th>
                 <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha de Agenda</th>
                 @role([
@@ -62,11 +61,10 @@
                         </td>
                     @endcan
                     <td class="align-middle text-center">
-                        <h6 class="mb-0 text-xs hover:cursor-pointer" onclick="detalleCliente({{ $value->id }})">
-                            {{ $value->ruc }}</h6>
-                    </td>
-                    <td class="align-middle text-center">
                         <p class="text-xs font-weight-bold mb-0 uppercase">{{ substr($value->razon_social, 0, 30) }}</p>
+                        <h6 class="mb-0 text-xs hover:cursor-pointer" onclick="detalleCliente({{ $value->id }})">
+                            {{ $value->ruc }}
+                        </h6>
                     </td>
 
                     @role(['sistema', 'gerente general', 'gerente comercial', 'asistente comercial', 'jefe comercial',
@@ -99,11 +97,11 @@
                         <span
                             class="text-secondary text-xs font-weight-normal">{{ date('d/m/Y H:i:s A', strtotime($value->fecha_gestion)) }}</span>
                     </td>
-                    {{-- <td class="align-middle text-center">
+                    <td class="align-middle text-center">
                         <span class="text-xs font-weight-bold mb-0 uppercase">
-                            {{ optional($value->movistars->last()?->clientetipo)->nombre ?? '-' }}
+                            {{ $value->tipobase }}
                         </span>
-                    </td> --}}
+                    </td>
                     <td class="align-middle text-center text-sm">
                         @if ($dias >= 60)
                             <span

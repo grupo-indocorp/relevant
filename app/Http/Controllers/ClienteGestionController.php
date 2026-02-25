@@ -10,6 +10,7 @@ use App\Models\Departamento;
 use App\Models\Distrito;
 use App\Models\Equipo;
 use App\Models\Etapa;
+use App\Models\Etiqueta;
 use App\Models\Movistar;
 use App\Models\Provincia;
 use App\Models\Sede;
@@ -396,6 +397,15 @@ class ClienteGestionController extends Controller
             $data = $this->clienteService->obtenerClienteDetalle($user, $cliente_id);
 
             return view('sistema.cliente.gestion.detalle', compact('data'));
+        }
+        elseif ($view === 'edit-importar') {
+            $users = User::role('ejecutivo')->get();
+            $etiquetas = Etiqueta::whereIn('id',[5,6])->get();
+
+            return view('sistema.cliente.gestion.importar', compact(
+                'users',
+                'etiquetas',
+            ));
         }
     }
 

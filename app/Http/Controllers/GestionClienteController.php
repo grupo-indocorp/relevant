@@ -32,10 +32,14 @@ class GestionClienteController extends Controller
 
     public function import()
     {
-        $file = request()->file('file');
-        Excel::import(new ClientesImport, $file);
-
-        return redirect()->route('gestion_cliente.index')->with('success', 'All good!');
+        if (request()->hasFile('file')) {
+            $user_id = request('import_user_id');
+            $etiqueta_id = request('import_etiqueta_id');
+            $file = request()->file('file');
+            Excel::import(new ClientesImport($user_id, $etiqueta_id), $file);
+            return response()->json(['success' => true, 'message' => 'Archivo importado']);
+        }
+        return response()->json(['success' => false, 'message' => 'No se recibió archivo'], 400);
     }
 
     /**

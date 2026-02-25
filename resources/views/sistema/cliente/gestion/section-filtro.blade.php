@@ -157,6 +157,18 @@
                                             onclick="exportFunnel('secodi')" type="button">Funnel Secodi</a>
                                     @endif
                                 @endcan
+                                {{-- Subir clientes --}}
+                                @role([
+                                        'sistema',
+                                        'administrador',
+                                    ])
+                                    <a href="javascript:;"
+                                        class="btn bg-gradient-warning m-0"
+                                        id="btnSubirClientes"
+                                        type="button">
+                                        Subir Clientes
+                                    </a>
+                                @endrole
                             </div>
                             <div class="form-group">
                                 <select class="form-control" name="paginate" id="paginate" style="width: 80px;"
@@ -214,4 +226,21 @@
             form.submit();
         }
     }
+    // Importar clientes
+    document.getElementById('btnSubirClientes').addEventListener('click', function(e) {
+        $.ajax({
+            url: `{{ url('cliente-gestion/0/edit') }}`,
+            method: "GET",
+            data: {
+                view: 'edit-importar',
+            },
+            success: function(result) {
+                $('#contModal').html(result);
+                openModal();
+            },
+            error: function(response) {
+                console.log('error');
+            }
+        });
+    });
 </script>
