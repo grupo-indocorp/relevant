@@ -21,7 +21,7 @@
 
                 @role(['sistema', 'gerente general', 'gerente comercial', 'asistente comercial', 'capacitador',
                     'planificacion'])
-                    <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Sede</th>
+                    {{-- <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Sede</th> --}}
                 @endrole
 
                 <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Comentario</th>
@@ -84,9 +84,9 @@
 
                     @role(['sistema', 'gerente general', 'gerente comercial', 'asistente comercial', 'capacitador',
                         'planificacion'])
-                        <td class="align-middle text-center">
+                        {{-- <td class="align-middle text-center">
                             <span class="text-xs font-weight-bold mb-0 uppercase">{{ $value->sede->nombre }}</span>
-                        </td>
+                        </td> --}}
                     @endrole
 
                     <td class="align-middle text-center">
