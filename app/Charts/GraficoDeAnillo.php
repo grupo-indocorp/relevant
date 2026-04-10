@@ -2,9 +2,9 @@
 
 namespace App\Charts;
 
-use App\Models\Etapa;
 use ArielMejiaDev\LarapexCharts\LarapexChart;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class GraficoDeAnillo
 {
@@ -17,25 +17,50 @@ class GraficoDeAnillo
 
     public function build(Builder $clientesQuery): \ArielMejiaDev\LarapexCharts\DonutChart
     {
-        // Obtener todas las etapas en orden de la base de datos
-        $etapas = Etapa::orderBy('id')->get();
+        // Paso 1: contar clientes por etapa_id usando clientesQuery (ya filtrado por equipo/ejecutivo/fecha)
+        $countsPorEtapaId = $clientesQuery->clone()
+            ->toBase()
+            ->select(DB::raw('etapa_id, count(*) as total'))
+            ->groupBy('etapa_id')
+            ->get()
+            ->pluck('total', 'etapa_id');
 
-        // Preparar arrays para los datos del gráfico
+        // Paso 2: para cada etapa_id con clientes, obtener nombre y color
+        // Agrupamos por nombre para fusionar duplicados (mismo nombre, distinto id)
+        // El color se toma de la etapa con estado=1
+        $etapasInfo = DB::table('etapas')
+            ->whereIn('id', $countsPorEtapaId->keys())
+            ->select('id', 'nombre', 'color', 'estado')
+            ->orderBy('id')
+            ->get();
+
+        // Agrupar por nombre: sumar totales y elegir color de estado=1
+        $agrupado = [];
+        foreach ($etapasInfo as $etapa) {
+            $nombre = $etapa->nombre;
+            $total  = (int) $countsPorEtapaId->get($etapa->id, 0);
+            if (!isset($agrupado[$nombre])) {
+                $agrupado[$nombre] = ['total' => 0, 'color' => '#cccccc', 'min_id' => $etapa->id];
+            }
+            $agrupado[$nombre]['total'] += $total;
+            // Preferir color de la etapa con estado=1
+            if ($etapa->estado == 1) {
+                $agrupado[$nombre]['color'] = $etapa->color;
+            }
+            $agrupado[$nombre]['min_id'] = min($agrupado[$nombre]['min_id'], $etapa->id);
+        }
+
+        // Ordenar por min_id para mantener orden consistente
+        uasort($agrupado, fn($a, $b) => $a['min_id'] <=> $b['min_id']);
+
         $etapasNombres = [];
         $etapasCounts = [];
         $etapasColores = [];
 
-        foreach ($etapas as $etapa) {
-            // Contar clientes para cada etapa
-            $count = $clientesQuery->clone()
-                ->where('etapa_id', $etapa->id)
-                ->count();
-
-            if ($count > 0) {
-                $etapasNombres[] = $etapa->nombre;
-                $etapasCounts[] = $count;
-                $etapasColores[] = $etapa->color;
-            }
+        foreach ($agrupado as $nombre => $data) {
+            $etapasNombres[] = $nombre;
+            $etapasCounts[]  = $data['total'];
+            $etapasColores[] = $data['color'];
         }
 
         $totalClientes = array_sum($etapasCounts);
