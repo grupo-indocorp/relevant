@@ -5,7 +5,7 @@ namespace App\Charts;
 use ArielMejiaDev\LarapexCharts\LarapexChart;
 use Illuminate\Database\Eloquent\Builder;
 
-class GraficoDeConversion
+class GraficoIndiceContactabilidad
 {
     protected $chart;
 
@@ -16,17 +16,16 @@ class GraficoDeConversion
 
     public function build(Builder $clientesQuery): \ArielMejiaDev\LarapexCharts\RadialChart
     {
-        // Calcular métricas de conversión
-        $totalClientes = $clientesQuery->count();
-        $clientesConvertidos = $clientesQuery->where('etapa_id', 5)->count();
-        $tasaConversion = $totalClientes > 0 ? round(($clientesConvertidos / $totalClientes) * 100, 2) : 0;
+        $total = $clientesQuery->clone()->count();
+        $contactados = $clientesQuery->clone()->where('contactabilidad', false)->count();
+        $indice = $total > 0 ? round(($contactados / $total) * 100, 2) : 0;
 
         return $this->chart->radialChart()
-            ->setTitle('Tasa de Conversión')
-            ->setSubtitle('Porcentaje de clientes en etapa final')
-            ->addData([$tasaConversion])
-            ->setLabels(['Conversión'])
-            ->setColors(['#00E396'])
+            ->setTitle('Índice de Contactabilidad')
+            ->setSubtitle("$contactados de $total clientes contactados")
+            ->addData([$indice])
+            ->setLabels(['Contactados'])
+            ->setColors(['#008FFB'])
             ->setOptions([
                 'plotOptions' => [
                     'radialBar' => [
@@ -48,16 +47,6 @@ class GraficoDeConversion
                             ],
                         ],
                     ],
-                ],
-                'tooltip' => [
-                    'y' => [
-                        'formatter' => 'function(value) { return value + "%" }',
-                    ],
-                ],
-                'legend' => [
-                    'show' => true,
-                    'position' => 'bottom',
-                    'formatter' => 'function() { return "Conversión (' . $clientesConvertidos . ' - ' . $tasaConversion . '%)" }',
                 ],
             ]);
     }
