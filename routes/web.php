@@ -33,6 +33,7 @@ use App\Http\Controllers\UbigeoController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\BusquedaController;
 
 // Ruta para la página de componentes
 Route::get('/components', function () {
@@ -126,6 +127,45 @@ Route::middleware([
   
 
     Route::post('/contactos', [ContactoController::class, 'store'])->name('contactos.store');
+
+    // Sistema de Búsqueda RUC/DNI
+    Route::prefix('busqueda')->name('busqueda.')->middleware(['busqueda.permission:busqueda.access'])->group(function () {
+        // Página principal del sistema de búsqueda
+        Route::get('/', [BusquedaController::class, 'index'])->name('index');
+
+        // Página de búsqueda masiva con opciones para RUC 10 y RUC 20
+        Route::get('/masivo', [BusquedaController::class, 'buscarMasivo'])->name('masivo');
+
+        // Búsqueda RUC 20
+        Route::get('/ruc20', [BusquedaController::class, 'buscarRUC20'])->name('ruc20')->middleware('busqueda.permission:busqueda.ruc20.individual');
+        Route::post('/ruc20', [BusquedaController::class, 'buscarRUC20'])->name('ruc20.search')->middleware('busqueda.permission:busqueda.ruc20.individual');
+        Route::get('/ruc20/masivo', [BusquedaController::class, 'buscarRUC20Masivo'])->name('ruc20.masivo')->middleware('busqueda.permission:busqueda.ruc20.masivo');
+        Route::post('/ruc20/export', [BusquedaController::class, 'exportRUC20CSV'])->name('ruc20.export')->middleware('busqueda.permission:busqueda.ruc20.export');
+
+        // Búsqueda DNI/RUC 10
+        Route::get('/dni', [BusquedaController::class, 'buscarDNI'])->name('dni')->middleware('busqueda.permission:busqueda.ruc10.individual');
+        Route::post('/dni', [BusquedaController::class, 'buscarDNI'])->name('dni.search')->middleware('busqueda.permission:busqueda.ruc10.individual');
+        Route::get('/ruc10/masivo', [BusquedaController::class, 'buscarRUC10Masivo'])->name('ruc10.masivo')->middleware('busqueda.permission:busqueda.ruc10.masivo');
+        Route::post('/ruc10/export', [BusquedaController::class, 'exportRUC10CSV'])->name('ruc10.export')->middleware('busqueda.permission:busqueda.ruc10.export');
+    });
+
+    // API endpoints para búsquedas (AJAX)
+    Route::prefix('api/busqueda')->name('api.busqueda.')->middleware(['busqueda.permission:busqueda.access'])->group(function () {
+        Route::get('/ruc20/suggestions', [BusquedaController::class, 'getRUC20Suggestions'])->name('ruc20.suggestions');
+        Route::get('/ruc10/suggestions', [BusquedaController::class, 'getRUC10Suggestions'])->name('ruc10.suggestions');
+        Route::get('/ruc20/stats', [BusquedaController::class, 'getRUC20Stats'])->name('ruc20.stats')->middleware('busqueda.permission:busqueda.ruc20.stats');
+        Route::get('/ruc10/stats', [BusquedaController::class, 'getRUC10Stats'])->name('ruc10.stats')->middleware('busqueda.permission:busqueda.ruc10.stats');
+        
+        // API de filtros
+        Route::get('/filter-options/ruc20/{column}', [BusquedaController::class, 'getRUC20FilterOptions'])->name('ruc20.filter_options');
+        Route::get('/filter-options/ruc10/{column}', [BusquedaController::class, 'getRUC10FilterOptions'])->name('ruc10.filter_options');
+        Route::get('/filter-options/{search_type}/{column}', [BusquedaController::class, 'getFilterOptions'])->name('filter_options');
+        Route::get('/{search_type}/actividades-economicas', [BusquedaController::class, 'getActividadEconomicaOptions'])->name('actividades_economicas');
+
+        // API de ubicaciones
+        Route::get('/locations/{search_type}/provincias/{departamento}', [BusquedaController::class, 'getProvinciasByDepartamento'])->name('provincias');
+        Route::get('/locations/{search_type}/distritos/{departamento}/{provincia}', [BusquedaController::class, 'getDistritosByProvincia'])->name('distritos');
+    });
 });
 
 Livewire::setScriptRoute(function ($handle) {

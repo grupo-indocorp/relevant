@@ -64,6 +64,27 @@ return [
             ]) : [],
         ],
 
+        'mysql_flask' => [
+            'driver' => 'mysql',
+            'url' => env('FLASK_DATABASE_URL'),
+            'host' => env('FLASK_DB_HOST'),
+            'port' => env('FLASK_DB_PORT'),
+            'database' => env('FLASK_DB_DATABASE'),
+            'username' => env('FLASK_DB_USERNAME'),
+            'password' => env('FLASK_DB_PASSWORD'),
+            'unix_socket' => env('FLASK_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'timezone' => '-05:00',
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('FLASK_MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

@@ -22,6 +22,12 @@ class Sidebar extends Component
                 'can' => 'sistema.cliente',
             ],
             [
+                'icon' => 'fa-solid fa-building-columns',
+                'nombre' => 'Consultor SUNAT',
+                'url' => 'busqueda',
+                'can' => 'busqueda.access',
+            ],
+            [
                 'icon' => 'fa-table',
                 'nombre' => 'Funnel',
                 'url' => 'funnel',
