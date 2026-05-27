@@ -114,6 +114,40 @@ class RUC10Service
         }
     }
 
+    public static function getPersonasBatchForExport(array $filters = [], int $limit = 10000, ?string $lastDni = null): array
+    {
+        try {
+            Log::debug("RUC10Service::getPersonasBatchForExport llamado", ['filters' => $filters, 'limit' => $limit, 'lastDni' => $lastDni]);
+            $result = RUC10Repository::fetchPersonasForExportBatch($filters, $limit, $lastDni);
+            Log::debug("RUC10Service::getPersonasBatchForExport retornó " . count($result) . " registros");
+            if (!empty($result)) {
+                Log::debug("RUC10Service: Primer registro", reset($result));
+            }
+            return $result;
+        } catch (\Exception $e) {
+            Log::error("Error obteniendo personas para exportación RUC 10: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return [];
+        }
+    }
+
+    public static function getVinculacionesForDniList(array $dniList): array
+    {
+        try {
+            Log::debug("RUC10Service::getVinculacionesForDniList llamado con " . count($dniList) . " DNIs");
+            $result = RUC10Repository::fetchVinculacionesByDniList($dniList);
+            Log::debug("RUC10Service::getVinculacionesForDniList retornó " . count($result) . " vinculaciones");
+            if (!empty($result)) {
+                Log::debug("RUC10Service: Primera vinculacion", reset($result));
+            }
+            return $result;
+        } catch (\Exception $e) {
+            Log::error("Error obteniendo vinculaciones para exportación RUC 10: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return [];
+        }
+    }
+
     /**
      * Obtiene conteo total de registros con filtros aplicados
      * 

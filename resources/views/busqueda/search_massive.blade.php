@@ -193,10 +193,13 @@
                                     <input type="text" class="form-control" id="searchId" placeholder="Ingrese RUC o DNI..."
                                         maxlength="11">
                                 </div>
+
+                                  <!-- 
                                 <div class="col-md-6">
                                     <label for="searchRazonSocial" class="form-label">Razón Social / Nombres</label>
                                     <input type="text" class="form-control" id="searchRazonSocial" placeholder="Ingrese razón social o nombres...">
                                 </div>
+-->
                             </div>
 
                             <div class="row mb-3">
@@ -777,22 +780,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        const razonSocial = document.getElementById('searchRazonSocial').value.trim();
+        const razonSocialElement = document.getElementById('searchRazonSocial');
+        const razonSocial = razonSocialElement ? razonSocialElement.value.trim() : '';
         if (razonSocial) filters.razon_social = razonSocial;
 
-        const estado = document.getElementById('searchEstado').value;
+        const estadoElement = document.getElementById('searchEstado');
+        const estado = estadoElement ? estadoElement.value : '';
         if (estado) filters.estado = estado;
 
-        const condicion = document.getElementById('searchCondicion').value;
+        const condicionElement = document.getElementById('searchCondicion');
+        const condicion = condicionElement ? condicionElement.value : '';
         if (condicion) filters.condicion = condicion;
 
-        const departamento = document.getElementById('searchDepartamento').value;
+        const departamentoElement = document.getElementById('searchDepartamento');
+        const departamento = departamentoElement ? departamentoElement.value : '';
         if (departamento) filters.departamento = departamento;
 
-        const provincia = document.getElementById('searchProvincia').value;
+        const provinciaElement = document.getElementById('searchProvincia');
+        const provincia = provinciaElement ? provinciaElement.value : '';
         if (provincia) filters.provincia = provincia;
 
-        const distrito = document.getElementById('searchDistrito').value;
+        const distritoElement = document.getElementById('searchDistrito');
+        const distrito = distritoElement ? distritoElement.value : '';
         if (distrito) filters.distrito = distrito;
 
         if (selectedActividadesEconomicas.length > 0) {
@@ -1339,7 +1348,7 @@ record.consultas_sunat && record.consultas_sunat.length > 0 ? `
                     <div class="row">
 
                         <div class="col-md-8">
-                            <strong>Empresa donde figura vinculada la persona:</strong> ${cons.nombre_razon_social || '-'}
+                            <strong>Empresa donde figura vinculada la persona:</strong> ${cons.nombre_razon_social || '-'} - ${cons.ruc}
                         </div>
 
                         <div class="col-md-4 text-end">

@@ -20,6 +20,7 @@
             <!-- Contenedor de Opciones -->
             <div class="row">
                 <!-- Opción 1: Búsqueda RUC 20 Individual -->
+                @can('busqueda.view.ruc20.individual')
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-lg hover-lift">
                         <div class="card-body text-center">
@@ -36,8 +37,10 @@
                         </div>
                     </div>
                 </div>
+                @endcan
 
                 <!-- Opción 2: Búsqueda DNI Individual -->
+                @can('busqueda.view.ruc10.individual')
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-lg hover-lift">
                         <div class="card-body text-center">
@@ -54,8 +57,10 @@
                         </div>
                     </div>
                 </div>
+                @endcan
 
                 <!-- Opción 3: Búsqueda Masiva -->
+                @canany(['busqueda.view.ruc20.masivo', 'busqueda.view.ruc10.masivo'])
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-lg hover-lift">
                         <div class="card-body text-center">
@@ -72,10 +77,12 @@
                         </div>
                     </div>
                 </div>
+                @endcanany
             </div>
 
             <!-- Estadísticas en tiempo real -->
             <div class="row mt-5">
+                @can('busqueda.view.ruc20.stats')
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header bg-primary text-white">
@@ -90,6 +97,9 @@
                         </div>
                     </div>
                 </div>
+                @endcan
+
+                @can('busqueda.view.ruc10.stats')
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header bg-success text-white">
@@ -104,20 +114,30 @@
                         </div>
                     </div>
                 </div>
+                @endcan
             </div>
 
             <!-- Información Adicional -->
-            <div class="row mt-5">
-                <div class="col-md-12">
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Información:</strong>
-                        Esta plataforma permite consultar información de empresas y contribuyentes en la base de datos
-                        SUNAT. Selecciona una de las opciones anteriores para comenzar tu búsqueda.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </div>
-            </div>
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="alert alert-dismissible fade show shadow"
+             role="alert"
+             style="background:#f8d7da; color:#842029; border:1px solid #f5c2c7;">
+
+            <i class="fas fa-exclamation-triangle"></i>
+
+            <strong>Advertencia de Riesgo:</strong>
+            La información mostrada en esta plataforma proviene de consultas realizadas a la base de datos SUNAT y puede estar sujeta a actualizaciones, modificaciones o restricciones externas.
+            El uso indebido, manipulación o interpretación incorrecta de los datos es responsabilidad exclusiva del usuario.
+            Verifique siempre la información antes de utilizarla para fines legales, comerciales o tributarios.
+
+            <br><br>
+            © LBL - ILenTech - GRUPO ETHERNALBLUE
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>

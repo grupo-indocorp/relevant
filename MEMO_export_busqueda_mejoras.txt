@@ -1,0 +1,80 @@
+MEJORAS AGREGADAS (PERMISOS + RENDERIZADO DE CAMPOS + EXPORTACIÓN ZIP)
+
+1) Mejora de permisos del módulo Busqueda
+- Se ajustó la clase: BusquedaPermissionSeeder.
+- En el seeder se eliminaron permisos/configuraciones antiguas dentro de la clase:
+  - busqueda.config
+  - busqueda.admin
+  Nota: si esos permisos existen ya registrados en BD, se deben eliminar también de la base de datos.
+
+- Se agregaron nuevos permisos para habilitar vistas/acciones/endpoints asociados:
+  - busqueda.view.ruc20.individual
+  - busqueda.view.ruc20.masivo
+  - busqueda.view.ruc20.export
+  - busqueda.view.ruc20.stats
+  - busqueda.view.ruc10.individual
+  - busqueda.view.ruc10.masivo
+  - busqueda.view.ruc10.export
+  - busqueda.view.ruc10.stats
+
+Permiso global del módulo
+- busqueda.access (obligatorio)
+  - Permite ingresar al módulo de búsqueda.
+  - En web.php se aplica al grupo Route::prefix('busqueda')..., por lo que sin este permiso no se puede acceder a ninguna ruta del módulo.
+  - Se combina con permisos específicos para habilitar funcionalidades (por ejemplo, el acceso a acciones/íconos de consulta).
+
+Permisos RUC20 (empresas)
+- busqueda.ruc20.individual
+  - Permite usar la búsqueda individual de RUC 20.
+  - Protege las rutas /busqueda/ruc20 y POST /busqueda/ruc20.
+
+- busqueda.ruc20.masivo
+  - Permite acceder a la búsqueda masiva de RUC 20.
+  - Protege la ruta /busqueda/ruc20/masivo.
+
+- busqueda.ruc20.export
+  - Permite exportar resultados de RUC 20 a CSV/ZIP.
+  - Protege la ruta POST /busqueda/ruc20/export.
+
+- busqueda.ruc20.stats
+  - Permite consultar estadísticas/informes para RUC 20.
+  - Protege la ruta GET /api/busqueda/ruc20/stats.
+
+Permisos RUC10 / DNI (personas)
+- busqueda.ruc10.individual
+  - Permite usar la búsqueda individual de DNI/RUC 10.
+  - Protege las rutas /busqueda/dni y POST /busqueda/dni.
+
+- busqueda.ruc10.masivo
+  - Permite acceder a la búsqueda masiva de RUC 10.
+  - Protege la ruta /busqueda/ruc10/masivo.
+
+- busqueda.ruc10.export
+  - Permite exportar resultados de RUC 10 a CSV/ZIP.
+  - Protege la ruta POST /busqueda/ruc10/export.
+
+- busqueda.ruc10.stats
+  - Permite consultar estadísticas/informes para RUC 10.
+  - Protege la ruta GET /api/busqueda/ruc10/stats.
+
+Cómo ejecutar el seeder
+- Comando:
+  php artisan db:seed --class=BusquedaPermissionSeeder
+
+Recomendado después (Spatie Permissions)
+- Limpiar cache de permisos:
+  php artisan permission:cache-reset
+
+2) Renderizado de campos (mejora para exportación/visualización)
+- Se mejoró el renderizado/preparación de campos para que los valores salgan consistentes y correctos al procesar/exportar.
+
+3) Mejora de exportación masiva (CSV/ZIP) en RUC10 y RUC20
+- Se optimizó la exportación para reducir riesgos de timeout y mejorar estabilidad en grandes volúmenes.
+- A nivel de ejecución se incrementaron límites (set_time_limit e ini_set).
+- A nivel de memoria se realizó recolección periódica (gc_collect_cycles) por lotes.
+
+Resultado esperado
+- Exportaciones RUC10 y RUC20 más robustas para volúmenes grandes.
+- Menos fallas por tiempo de ejecución.
+- Mejor control de memoria durante la generación del ZIP.
+

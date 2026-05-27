@@ -114,6 +114,40 @@ class RUC20Service
         }
     }
 
+    public static function getEmpresasBatchForExport(array $filters = [], int $limit = 10000, int $lastId = 0): array
+    {
+        try {
+            Log::debug("RUC20Service::getEmpresasBatchForExport llamado", ['filters' => $filters, 'limit' => $limit, 'lastId' => $lastId]);
+            $result = RUC20Repository::fetchEmpresasForExportBatch($filters, $limit, $lastId);
+            Log::debug("RUC20Service::getEmpresasBatchForExport retornó " . count($result) . " registros");
+            if (!empty($result)) {
+                Log::debug("RUC20Service: Primer registro", reset($result));
+            }
+            return $result;
+        } catch (\Exception $e) {
+            Log::error("Error obteniendo empresas para exportación RUC 20: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return [];
+        }
+    }
+
+    public static function getRepresentantesForRucList(array $rucList): array
+    {
+        try {
+            Log::debug("RUC20Service::getRepresentantesForRucList llamado con " . count($rucList) . " RUCs");
+            $result = RUC20Repository::fetchRepresentantesByRucList($rucList);
+            Log::debug("RUC20Service::getRepresentantesForRucList retornó " . count($result) . " representantes");
+            if (!empty($result)) {
+                Log::debug("RUC20Service: Primer representante", reset($result));
+            }
+            return $result;
+        } catch (\Exception $e) {
+            Log::error("Error obteniendo representantes para exportación RUC 20: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return [];
+        }
+    }
+
     /**
      * Obtiene conteo total de registros con filtros aplicados
      * 

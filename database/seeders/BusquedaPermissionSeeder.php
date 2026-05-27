@@ -22,6 +22,16 @@ class BusquedaPermissionSeeder extends Seeder
             'busqueda.access',
             'busqueda.view',
             
+            // Permisos de vista específicos
+            'busqueda.view.ruc20.individual',
+            'busqueda.view.ruc20.masivo',
+            'busqueda.view.ruc20.export',
+            'busqueda.view.ruc20.stats',
+            'busqueda.view.ruc10.individual',
+            'busqueda.view.ruc10.masivo',
+            'busqueda.view.ruc10.export',
+            'busqueda.view.ruc10.stats',
+            
             // Permisos para búsqueda RUC 20
             'busqueda.ruc20.individual',
             'busqueda.ruc20.masivo',
@@ -36,7 +46,6 @@ class BusquedaPermissionSeeder extends Seeder
             
             // Permisos administrativos
             'busqueda.admin',
-            'busqueda.config',
         ];
 
         // Crear permisos
@@ -60,6 +69,8 @@ class BusquedaPermissionSeeder extends Seeder
         $userRole->givePermissionTo([
             'busqueda.access',
             'busqueda.view',
+            'busqueda.view.ruc20.individual',
+            'busqueda.view.ruc10.individual',
             'busqueda.ruc20.individual',
             'busqueda.ruc10.individual',
         ]);
@@ -68,6 +79,12 @@ class BusquedaPermissionSeeder extends Seeder
         $consultorRole->givePermissionTo([
             'busqueda.access',
             'busqueda.view',
+            'busqueda.view.ruc20.individual',
+            'busqueda.view.ruc20.masivo',
+            'busqueda.view.ruc20.export',
+            'busqueda.view.ruc10.individual',
+            'busqueda.view.ruc10.masivo',
+            'busqueda.view.ruc10.export',
             'busqueda.ruc20.individual',
             'busqueda.ruc20.masivo',
             'busqueda.ruc20.export',

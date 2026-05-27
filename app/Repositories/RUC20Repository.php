@@ -561,6 +561,238 @@ class RUC20Repository
         }
     }
 
+    private static function buildExportWhereClause(?array $search_filter, array &$bindings): string
+    {
+        $where = [];
+
+        if (!empty($search_filter)) {
+            if (!empty($search_filter['ruc'])) {
+                $where[] = 'RUC = ?';
+                $bindings[] = $search_filter['ruc'];
+            }
+            if (!empty($search_filter['razon_social'])) {
+                $where[] = 'Razón_Social LIKE ?';
+                $bindings[] = '%' . $search_filter['razon_social'] . '%';
+            }
+            if (!empty($search_filter['estado'])) {
+                $where[] = 'Estado = ?';
+                $bindings[] = $search_filter['estado'];
+            }
+            if (!empty($search_filter['condicion'])) {
+                $where[] = 'Condicion = ?';
+                $bindings[] = $search_filter['condicion'];
+            }
+            if (!empty($search_filter['departamento'])) {
+                $where[] = 'Departamento = ?';
+                $bindings[] = $search_filter['departamento'];
+            }
+            if (!empty($search_filter['provincia'])) {
+                $where[] = 'Provincia = ?';
+                $bindings[] = $search_filter['provincia'];
+            }
+            if (!empty($search_filter['distrito'])) {
+                $where[] = 'Distrito = ?';
+                $bindings[] = $search_filter['distrito'];
+            }
+            if (!empty($search_filter['actividad_economica'])) {
+                $values = is_array($search_filter['actividad_economica']) ? $search_filter['actividad_economica'] : [$search_filter['actividad_economica']];
+                $placeholders = implode(',', array_fill(0, count($values), '?'));
+                $where[] = "Actividad_Economica_Principal IN ($placeholders)";
+                foreach ($values as $value) {
+                    $bindings[] = $value;
+                }
+            }
+
+            if (!empty($search_filter['min_trabajadores'])) {
+                $rango = $search_filter['min_trabajadores'];
+                $subqueryBase = "EXISTS (SELECT 1 FROM consultas_sunat cs " .
+                    "WHERE cs.ruc = ruc20_febrero28.RUC " .
+                    "AND cs.id = (SELECT id FROM consultas_sunat " .
+                    "WHERE ruc = ruc20_febrero28.RUC " .
+                    "ORDER BY fecha_consulta DESC LIMIT 1) ";
+
+                if (str_contains($rango, '-')) {
+                    [$minVal, $maxVal] = explode('-', $rango, 2);
+                    $where[] = $subqueryBase . "AND cs.cant_trabajadores BETWEEN ? AND ?)";
+                    $bindings[] = intval($minVal);
+                    $bindings[] = intval($maxVal);
+                } elseif (str_ends_with($rango, '+')) {
+                    $minVal = intval(str_replace('+', '', $rango));
+                    $where[] = $subqueryBase . "AND cs.cant_trabajadores >= ?)";
+                    $bindings[] = $minVal;
+                }
+            }
+
+            if (!empty($search_filter['min_anexos'])) {
+                $rango1 = $search_filter['min_anexos'];
+                $subqueryBaseAnexos = "EXISTS (SELECT 1 FROM consultas_sunat cs " .
+                    "WHERE cs.ruc = ruc20_febrero28.RUC " .
+                    "AND cs.id = (SELECT id FROM consultas_sunat " .
+                    "WHERE ruc = ruc20_febrero28.RUC " .
+                    "ORDER BY fecha_consulta DESC LIMIT 1) ";
+
+                if (str_contains($rango1, '-')) {
+                    [$minVal, $maxVal] = explode('-', $rango1, 2);
+                    $where[] = $subqueryBaseAnexos . "AND cs.cant_anexos BETWEEN ? AND ?)";
+                    $bindings[] = intval($minVal);
+                    $bindings[] = intval($maxVal);
+                } elseif (str_ends_with($rango1, '+')) {
+                    $minVal = intval(str_replace('+', '', $rango1));
+                    $where[] = $subqueryBaseAnexos . "AND cs.cant_anexos >= ?)";
+                    $bindings[] = $minVal;
+                }
+            }
+        }
+
+        return $where ? 'WHERE ' . implode(' AND ', $where) : '';
+    }
+
+    public static function fetchEmpresasForExportBatch(?array $search_filter = null, int $limit = 10000, int $lastId = 0): array
+    {
+        try {
+            $conn = DB::connection('mysql_flask');
+            $bindings = [];
+            $whereClause = self::buildExportWhereClause($search_filter, $bindings);
+
+            if ($lastId > 0) {
+                $bindings[] = $lastId;
+                $whereClause = trim($whereClause ? $whereClause . ' AND id > ?' : 'WHERE id > ?');
+            }
+
+            $rows = $conn->select("SELECT id, RUC, Estado, Condicion, Razón_Social,
+                        direccion, Tipo, Actividad_Economica_Principal,
+                        NroTrab, UBIGEO, Departamento, Provincia, Distrito,
+                        motivo, subsegmento_agosto, ganado_por, gerente,
+                        movistar_lines, claro_lines, entel_lines, competence_lines, s_m_l
+                    FROM ruc20_febrero28
+                    $whereClause
+                    ORDER BY id ASC
+                    LIMIT ?", array_merge($bindings, [$limit]));
+
+            $results = array_map(fn($r) => (array)$r, $rows);
+            if (empty($results)) {
+                return [];
+            }
+
+            $rucList = array_values(array_unique(array_column($results, 'RUC')));
+            $placeholders = implode(',', array_fill(0, count($rucList), '?'));
+
+            $consultasSql = "SELECT * FROM (SELECT id as consulta_id, ruc, cant_trabajadores,
+                        nombre_razon_social, estado_contribuyente, condicion_contribuyente,
+                        actividades_economicas, cant_anexos, fecha_consulta,
+                        ROW_NUMBER() OVER (PARTITION BY ruc ORDER BY fecha_consulta DESC) as rn
+                    FROM consultas_sunat
+                    WHERE ruc IN ($placeholders)
+                ) t
+                WHERE rn = 1";
+
+            $consultas = $conn->select($consultasSql, $rucList);
+            $consultaByRuc = [];
+            foreach ($consultas as $c) {
+                $row = (array)$c;
+                $consultaByRuc[$row['ruc']] = $row;
+            }
+
+            foreach ($results as &$row) {
+                $consulta = $consultaByRuc[$row['RUC']] ?? [];
+                $row['cant_trabajadores'] = $consulta['cant_trabajadores'] ?? null;
+                $row['consulta_cant_trabajadores'] = $consulta['cant_trabajadores'] ?? null;
+                $row['consulta_nombre_razon_social'] = $consulta['nombre_razon_social'] ?? null;
+                $row['consulta_estado_contribuyente'] = $consulta['estado_contribuyente'] ?? null;
+                $row['consulta_condicion_contribuyente'] = $consulta['condicion_contribuyente'] ?? null;
+                $row['consulta_actividades_economicas'] = $consulta['actividades_economicas'] ?? null;
+                $row['consulta_cant_anexos'] = $consulta['cant_anexos'] ?? null;
+                $row['consulta_fecha_consulta'] = $consulta['fecha_consulta'] ?? null;
+            }
+            unset($row);
+
+            return $results;
+        } catch (\Exception $e) {
+            Log::error("Error RUC20Repository::fetchEmpresasForExportBatch: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public static function fetchRepresentantesByRucList(array $rucList): array
+    {
+        try {
+            if (empty($rucList)) {
+                Log::debug("RUC20Repository::fetchRepresentantesByRucList: Lista RUC vacía");
+                return [];
+            }
+            
+            Log::debug("RUC20Repository::fetchRepresentantesByRucList: " . count($rucList) . " RUCs");
+            $conn = DB::connection('mysql_flask');
+            $placeholders = implode(',', array_fill(0, count($rucList), '?'));
+
+            $consultasSql = "SELECT * FROM (SELECT id as consulta_id, ruc,
+                        ROW_NUMBER() OVER (PARTITION BY ruc ORDER BY fecha_consulta DESC) as rn
+                    FROM consultas_sunat
+                    WHERE ruc IN ($placeholders)
+                ) t
+                WHERE rn = 1";
+
+            $consultas = $conn->select($consultasSql, $rucList);
+            $consultaMap = [];
+            $consultaIds = [];
+            foreach ($consultas as $c) {
+                $row = (array)$c;
+                $consultaMap[$row['consulta_id']] = $row['ruc'];
+                $consultaIds[] = $row['consulta_id'];
+            }
+
+            if (empty($consultaIds)) {
+                return [];
+            }
+
+            $repPlaceholders = implode(',', array_fill(0, count($consultaIds), '?'));
+            $repsRows = $conn->select("SELECT consulta_id, tipo_documento, numero_documento, nombre, cargo
+                    FROM representantes_legales
+                    WHERE consulta_id IN ($repPlaceholders)", $consultaIds);
+
+            $reps = array_map(fn($r) => (array)$r, $repsRows);
+            $docNumbers = array_values(array_unique(array_filter(array_column($reps, 'numero_documento'))));
+
+            $telMap = [];
+            if (!empty($docNumbers)) {
+                $docPlaceholders = implode(',', array_fill(0, count($docNumbers), '?'));
+                $telRows = $conn->select("SELECT documento, lista_movistar, lista_claro, lista_entel, lista_otros
+                        FROM super_tabla_telefonos
+                        WHERE documento IN ($docPlaceholders)", $docNumbers);
+
+                foreach ($telRows as $tel) {
+                    $telRow = (array)$tel;
+                    $telMap[$telRow['documento']] = $telRow;
+                }
+            }
+
+            $final = [];
+            foreach ($reps as $rep) {
+                $ruc = $consultaMap[$rep['consulta_id']] ?? null;
+                if (empty($ruc)) {
+                    continue;
+                }
+
+                $final[] = [
+                    'ruc' => $ruc,
+                    'nombre' => $rep['nombre'] ?? null,
+                    'cargo' => $rep['cargo'] ?? null,
+                    'tipo_doc' => $rep['tipo_documento'] ?? null,
+                    'nro_doc' => $rep['numero_documento'] ?? null,
+                    'operador_movistar' => $telMap[$rep['numero_documento']]['lista_movistar'] ?? null,
+                    'operador_claro' => $telMap[$rep['numero_documento']]['lista_claro'] ?? null,
+                    'operador_entel' => $telMap[$rep['numero_documento']]['lista_entel'] ?? null,
+                    'operador_otros' => $telMap[$rep['numero_documento']]['lista_otros'] ?? null,
+                ];
+            }
+
+            return $final;
+        } catch (\Exception $e) {
+            Log::error("Error RUC20Repository::fetchRepresentantesByRucList: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public static function getFilterValues(string $column): array
     {
         $allowed = ['Estado', 'Condicion', 'Tipo', 'Departamento', 'Provincia', 'Distrito', 'motivo', 'subsegmento_agosto'];

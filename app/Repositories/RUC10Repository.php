@@ -426,6 +426,186 @@ class RUC10Repository
         }
     }
 
+    private static function buildExportWhereClause(?array $search_filter, array &$bindings): string
+    {
+        $where = [];
+
+        if (!empty($search_filter)) {
+            if (!empty($search_filter['dni'])) {
+                $where[] = 'dni = ?';
+                $bindings[] = $search_filter['dni'];
+            }
+            if (!empty($search_filter['razon_social'])) {
+                $where[] = 'Razón_Social LIKE ?';
+                $bindings[] = '%' . $search_filter['razon_social'] . '%';
+            }
+            if (!empty($search_filter['estado'])) {
+                $where[] = 'Estado = ?';
+                $bindings[] = $search_filter['estado'];
+            }
+            if (!empty($search_filter['condicion'])) {
+                $where[] = 'Condicion = ?';
+                $bindings[] = $search_filter['condicion'];
+            }
+            if (!empty($search_filter['departamento'])) {
+                $where[] = 'Departamento = ?';
+                $bindings[] = $search_filter['departamento'];
+            }
+            if (!empty($search_filter['provincia'])) {
+                $where[] = 'Provincia = ?';
+                $bindings[] = $search_filter['provincia'];
+            }
+            if (!empty($search_filter['distrito'])) {
+                $where[] = 'Distrito = ?';
+                $bindings[] = $search_filter['distrito'];
+            }
+            if (!empty($search_filter['actividad_economica'])) {
+                $values = is_array($search_filter['actividad_economica']) ? $search_filter['actividad_economica'] : [$search_filter['actividad_economica']];
+                $placeholders = implode(',', array_fill(0, count($values), '?'));
+                $where[] = "Actividad_Economica_Principal IN ($placeholders)";
+                foreach ($values as $value) {
+                    $bindings[] = $value;
+                }
+            }
+        }
+
+        return $where ? 'WHERE ' . implode(' AND ', $where) : '';
+    }
+
+    public static function fetchPersonasForExportBatch(?array $search_filter = null, int $limit = 10000, ?string $lastDni = null): array
+    {
+        try {
+            Log::debug("RUC10Repository::fetchPersonasForExportBatch", ['filter' => $search_filter, 'limit' => $limit, 'lastDni' => $lastDni]);
+            $conn = DB::connection('mysql_flask');
+            $bindings = [];
+            $whereClause = self::buildExportWhereClause($search_filter, $bindings);
+            Log::debug("RUC10Repository: whereClause = " . $whereClause);
+
+            if (!empty($lastDni)) {
+                $bindings[] = $lastDni;
+                $whereClause = trim($whereClause ? $whereClause . ' AND dni > ?' : 'WHERE dni > ?');
+            }
+            Log::debug("RUC10Repository: Final whereClause = " . $whereClause . ", bindings = " . json_encode($bindings));
+
+            $rows = $conn->select("SELECT dni, RUC, Estado, Condicion, Actividad_Economica_Principal,
+                        direccion, UBIGEO, Departamento, Provincia, Distrito, Razón_Social
+                    FROM ruc10_febrero28
+                    $whereClause
+                    ORDER BY dni ASC
+                    LIMIT ?", array_merge($bindings, [$limit]));
+
+            Log::debug("RUC10Repository: Query retornó " . count($rows) . " filas");
+
+            $results = array_map(fn($r) => (array)$r, $rows);
+            if (empty($results)) {
+                Log::debug("RUC10Repository: No hay resultados");
+                return [];
+            }
+
+            Log::debug("RUC10Repository: Primer resultado", reset($results));
+
+            $dnis = array_values(array_unique(array_column($results, 'dni')));
+            Log::debug("RUC10Repository: " . count($dnis) . " DNIs únicos");
+            
+            $placeholders = implode(',', array_fill(0, count($dnis), '?'));
+
+            $telRows = $conn->select("SELECT documento, lista_movistar, lista_claro, lista_entel, lista_otros
+                    FROM super_tabla_telefonos
+                    WHERE documento IN ($placeholders)", $dnis);
+
+            Log::debug("RUC10Repository: Telefonos retornó " . count($telRows) . " filas");
+
+            $reniecRows = $conn->select("SELECT dni, ap_pat, ap_mat, nombres, fecha_nac, fch_emision,
+                        fch_caducidad, ubigeo_dir, direccion, sexo, est_civil, madre, padre
+                    FROM reniec
+                    WHERE dni IN ($placeholders)", $dnis);
+
+            Log::debug("RUC10Repository: RENIEC retornó " . count($reniecRows) . " filas");
+
+            $telMap = [];
+            foreach ($telRows as $tel) {
+                $telArr = (array)$tel;
+                $telMap[$telArr['documento']] = $telArr;
+            }
+
+            $reniecMap = [];
+            foreach ($reniecRows as $reniec) {
+                $reniecArr = (array)$reniec;
+                $reniecMap[$reniecArr['dni']] = $reniecArr;
+            }
+
+            foreach ($results as &$row) {
+                $dni = $row['dni'];
+                $phones = $telMap[$dni] ?? [];
+                $reniec = $reniecMap[$dni] ?? [];
+
+                $row['lista_movistar'] = $phones['lista_movistar'] ?? null;
+                $row['lista_claro'] = $phones['lista_claro'] ?? null;
+                $row['lista_entel'] = $phones['lista_entel'] ?? null;
+                $row['lista_otros'] = $phones['lista_otros'] ?? null;
+
+                $row['ap_pat'] = $reniec['ap_pat'] ?? null;
+                $row['ap_mat'] = $reniec['ap_mat'] ?? null;
+                $row['nombres'] = $reniec['nombres'] ?? null;
+                $row['fecha_nac'] = $reniec['fecha_nac'] ?? null;
+                $row['fch_emision'] = $reniec['fch_emision'] ?? null;
+                $row['fch_caducidad'] = $reniec['fch_caducidad'] ?? null;
+                $row['sexo'] = $reniec['sexo'] ?? null;
+                $row['est_civil'] = $reniec['est_civil'] ?? null;
+                $row['madre'] = $reniec['madre'] ?? null;
+                $row['padre'] = $reniec['padre'] ?? null;
+                $row['ubigeo_dir'] = $reniec['ubigeo_dir'] ?? null;
+                $row['direccion_reniec'] = $reniec['direccion'] ?? null;
+            }
+            unset($row);
+
+            return $results;
+        } catch (\Exception $e) {
+            Log::error("Error RUC10Repository::fetchPersonasForExportBatch: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public static function fetchVinculacionesByDniList(array $dniList): array
+    {
+        try {
+            if (empty($dniList)) {
+                Log::debug("RUC10Repository::fetchVinculacionesByDniList: Lista DNI vacía");
+                return [];
+            }
+            
+            Log::debug("RUC10Repository::fetchVinculacionesByDniList: " . count($dniList) . " DNIs");
+            $conn = DB::connection('mysql_flask');
+            $placeholders = implode(',', array_fill(0, count($dniList), '?'));
+            
+            $sql = "SELECT rl.numero_documento as dni, cs.ruc as empresa_ruc, cs.nombre_razon_social as empresa,
+                        cs.estado_contribuyente as estado_empresa, rl.cargo, cs.condicion_contribuyente as condicion_empresa,
+                        cs.actividades_economicas as actividad_empresa,
+                        cs.cant_trabajadores as trabajadores, cs.cant_anexos as anexos,
+                        cs.fecha_consulta as ultima_actualizacion
+                    FROM representantes_legales rl
+                    JOIN consultas_sunat cs ON cs.id = rl.consulta_id
+                    WHERE rl.numero_documento IN ($placeholders)
+                    ORDER BY rl.numero_documento ASC, cs.fecha_consulta DESC";
+            
+            Log::debug("RUC10Repository: SQL query " . $sql);
+            Log::debug("RUC10Repository: Bindings " . json_encode($dniList));
+            
+            $rows = $conn->select($sql, $dniList);
+            
+            Log::debug("RUC10Repository::fetchVinculacionesByDniList: Query retornó " . count($rows) . " filas");
+            
+            if (!empty($rows)) {
+                Log::debug("RUC10Repository: Primera vinculacion", (array)reset($rows));
+            }
+
+            return array_map(fn($r) => (array)$r, $rows);
+        } catch (\Exception $e) {
+            Log::error("Error RUC10Repository::fetchVinculacionesByDniList: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public static function getFilterValues(string $column): array
     {
         $allowed = ['Estado','Condicion','Departamento','Provincia','Distrito','UBIGEO'];
