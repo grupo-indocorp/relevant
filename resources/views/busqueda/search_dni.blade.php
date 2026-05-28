@@ -310,12 +310,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const fullName = [reniec.ap_pat, reniec.ap_mat, reniec.nombres].filter(Boolean).join(' ');
             const formatFecha = (fecha) => {
                 if (!fecha) return '-';
-                const f = new Date(fecha);
-                if (isNaN(f)) return fecha;
-                const dia = String(f.getDate()).padStart(2, '0');
-                const mes = String(f.getMonth() + 1).padStart(2, '0');
-                const anio = f.getFullYear();
-                return `${dia}/${mes}/${anio}`;
+
+                // Evitar corrimiento por timezone cuando el backend envía YYYY-MM-DD
+                if (typeof fecha === 'string' && fecha.includes('-')) {
+                    const partes = fecha.split(' ')[0].split('-');
+                    if (partes.length === 3) {
+                        const [anio, mes, dia] = partes;
+                        return `${dia}/${mes}/${anio}`;
+                    }
+                }
+
+                return fecha;
             };
             const formatSexo = (sexo) => {
                 if (sexo === '1') return 'MASCULINO';
